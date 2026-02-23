@@ -1,5 +1,3 @@
 SDL2.dll
 sdl_utils.c
 sdl_utils.h
-circle.c
-circle.h
