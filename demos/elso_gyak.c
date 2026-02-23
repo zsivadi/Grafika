@@ -53,9 +53,9 @@ void calc_surface(struct Brick *br) {
 void find_square(struct Brick *br) {
 
     if (br->a == br->b || br->a == br->c || br->b == br->c) {
-        printf("\nA teglatestnek VAN negyzet alapku lapja!\n");
+        printf("\nA teglatestnek VAN negyzet alaku lapja!\n");
         return;
     }
 
-    printf("\nA teglatestnek NINCS negyzet alapku lapja!\n");
+    printf("\nA teglatestnek NINCS negyzet alaku lapja!\n");
 }
