@@ -34,4 +34,16 @@ void draw_origin();
 
 void draw_sphere(double radius, int slices, int stacks);
 
+// Helper function for drawing chess board
+
+void draw_chess_board();
+
+// Helper function for drawing cylinder
+
+void draw_cylinder(double radius, double height, int slices);
+
+// Helper function for drawing cone
+
+void draw_cone(double radius, double height, int slices);
+
 #endif /* SCENE_H */

@@ -55,9 +55,28 @@ void render_scene(const Scene* scene) {
 
         glRotatef(scene->sphere_angle, 0, 0, 1.0);
 
-        draw_sphere(0.5, 4, 4);
+        draw_sphere(0.5, 20, 20);
 
     glPopMatrix();
+
+    draw_chess_board();
+
+    glPushMatrix();
+
+        glTranslatef(3.5, 3.5, 0);
+        glColor3f(0, 0, 1);
+        draw_cylinder(0.5, 1, 50);
+
+    glPopMatrix();
+
+    glPushMatrix();
+
+        glTranslatef(6.5, 2.5, 0);
+        glColor3f(0.67, 0.52, 0);
+        draw_cone(0.5, 1, 50);
+
+    glPopMatrix();
+
 }
 
 void draw_origin()
@@ -95,4 +114,89 @@ void draw_sphere(double radius, int slices, int stacks) {
             glEnd();
         }
     }
+}
+
+void draw_chess_board() {
+
+    int size = 8;
+    int step = 1;
+
+    glBegin(GL_QUADS);
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+              
+                if ((i + j) % 2 == 0) {
+                    glColor3f(1, 1, 1);
+                } else {
+                    glColor3f(0, 0, 0);
+                }
+
+                glVertex3f(i * step, j * step, 0);
+                glVertex3f((i + 1) * step, j * step, 0);
+                glVertex3f((i + 1) * step, (j + 1) * step, 0);
+                glVertex3f(i * step, (j + 1) * step, 0);
+            }
+        }  
+    glEnd();
+}
+
+void draw_cylinder(double radius, double height, int slices) {
+    double x, y, angle;
+
+    glBegin(GL_QUAD_STRIP);
+
+        for (int i = 0; i <= slices; i++) {
+            
+            angle = (double)i * 2.0 * M_PI / slices;
+            x = cos(angle) * radius;
+            y = sin(angle) * radius;
+
+            glVertex3f(x, y, 0);
+            glVertex3f(x, y, height);
+
+        }
+    glEnd();
+
+    glBegin(GL_TRIANGLE_FAN);
+
+        glVertex3f(0, 0, 0.1);
+        for (int i = 0; i <= slices; i++) {
+            
+            angle = 2.0 * M_PI * i / slices;
+            glVertex3f(cos(angle) * radius, sin(angle) * radius, 0);
+        }
+    glEnd();
+
+    glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(0, 0, height); 
+        for (int i = 0; i <= slices; i++) {
+
+            angle = 2.0 * M_PI * i / slices;
+            glVertex3f(cos(angle) * radius, sin(angle) * radius, height);
+        }
+    glEnd();
+
+}
+
+void draw_cone(double radius, double height, int slices) {
+
+    glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(0, 0, height); 
+        for (int i = 0; i <= slices; i++) {
+
+            double angle = 2.0 * M_PI * i / slices;
+            glVertex3f(cos(angle) * radius, sin(angle) * radius, 0);
+        }
+    glEnd();
+
+    glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(0, 0, 0); 
+        for (int i = 0; i <= slices; i++) {
+
+            double angle = 2.0 * M_PI * i / slices;
+            glVertex3f(cos(angle) * radius, sin(angle) * radius, 0);
+        }
+    glEnd();
+
 }

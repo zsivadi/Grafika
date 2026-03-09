@@ -165,7 +165,7 @@ void handle_app_events(App* app)
         case SDL_MOUSEMOTION:
             SDL_GetMouseState(&x, &y);
             if (is_mouse_down) {
-                rotate_camera(&(app->camera), mouse_x - x, mouse_y - y);
+                rotate_camera(&(app->camera), (x - mouse_x) * 0.25, (y - mouse_y) * 0.25);
             }
             mouse_x = x;
             mouse_y = y;
