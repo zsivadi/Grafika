@@ -1,4 +1,6 @@
 SDL2.dll
+SDL2_image.dll
 sdl_utils.c
 sdl_utils.h
 pong.exe
+origin.exe
