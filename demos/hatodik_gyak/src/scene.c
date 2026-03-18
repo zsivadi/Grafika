@@ -17,8 +17,6 @@ void init_scene(Scene* scene)
     scene->model_y = 0.0f;
 
     scene->rotation = 0.0f;
-    scene->model_x = 0.0f;
-    scene->model_y = 0.0f;
 
     scene->material.ambient.red = 0.0;
     scene->material.ambient.green = 0.0;
@@ -35,44 +33,57 @@ void init_scene(Scene* scene)
     scene->material.shininess = 0.0;
 }
 
-void set_lighting()
+void set_lighting(float x, float y, float z)
 {
     float ambient_light[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     float diffuse_light[] = { 1.0f, 1.0f, 1.0, 1.0f };
     float specular_light[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    float position[] = { 0.0f, 0.0f, 10.0f, 1.0f };
+    float position[]    = { x, y, z, 1.0f };
 
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_light);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular_light);
+    float white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT,  white_light); 
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,  white_light);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
 }
 
 void set_material(const Material* material)
 {
+    /*
     float ambient_material_color[] = {
         material->ambient.red,
         material->ambient.green,
         material->ambient.blue
     };
+    */
+    float ambient_material_color[] = { 0.3f, 0.3f, 0.3f, 1.0f };
 
+    /*
     float diffuse_material_color[] = {
         material->diffuse.red,
         material->diffuse.green,
         material->diffuse.blue
     };
+    */
+    float diffuse_material_color[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 
+    /*
     float specular_material_color[] = {
         material->specular.red,
         material->specular.green,
         material->specular.blue
     };
+    */
+    float specular_material_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    float high_shininess = 60.0f;
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient_material_color);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse_material_color);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular_material_color);
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &(material->shininess));
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &high_shininess);
 }
 
 void update_scene(Scene* scene, double time)
@@ -82,8 +93,13 @@ void update_scene(Scene* scene, double time)
 
 void render_scene(const Scene* scene)
 {
+    float radius = 10.0f;
+    float light_x = cos(scene->rotation * 0.1f) * radius;
+    float light_z = sin(scene->rotation * 0.1f) * radius;
+    float light_y = 5.0f;
+
+    set_lighting(light_x, light_y, light_z);
     set_material(&(scene->material));
-    set_lighting();
     draw_origin();
 
     // 4x4-es grid feltöltése modellekkel 

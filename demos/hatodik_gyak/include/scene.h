@@ -26,7 +26,7 @@ void init_scene(Scene* scene);
 /**
  * Set the lighting of the scene.
  */
-void set_lighting();
+void set_lighting(float x, float y, float z);
 
 /**
  * Set the current material.
