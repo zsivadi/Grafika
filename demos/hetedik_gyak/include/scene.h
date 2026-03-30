@@ -4,7 +4,7 @@
 #include "camera.h"
 #include "pendulum.h"
 #include "bouncing_ball.h"
-// #include "animal.h"
+#include "animal.h"
 
 #include <obj/model.h>
 
@@ -14,7 +14,7 @@ typedef struct Scene
     
     Pendulum pendulum;
     BouncingBall ball;
-    // Animal animal;
+    Animal animal;
     
 } Scene;
 

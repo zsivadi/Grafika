@@ -20,6 +20,7 @@ void init_scene(Scene* scene) {
 
     init_pendulum(&(scene->pendulum), 0.0f, 0.0f, 4.0f);
     init_bouncing_ball(&(scene->ball), -4.0f, -4.0f, 5.0f);
+    init_animal(&(scene->animal), 0.0f, 3.0f, 2.0f);
 }
 
 void set_lighting() {
@@ -66,6 +67,7 @@ void update_scene(Scene* scene, double time) {
 
     update_pendulum(&(scene->pendulum), time);
     update_bouncing_ball(&(scene->ball), time);
+    update_animal(&(scene->animal), time);
 }
 
 void render_scene(const Scene* scene) {
@@ -91,6 +93,8 @@ void render_scene(const Scene* scene) {
     glEnable(GL_LIGHTING);
 
     render_bouncing_ball(&(scene->ball));
+
+    render_animal(&(scene->animal));
 }
 
 void draw_origin() {

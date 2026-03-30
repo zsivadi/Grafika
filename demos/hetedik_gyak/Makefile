@@ -11,7 +11,8 @@ SRCS = src/main.c \
        src/scene.c \
        src/utils.c \
        src/pendulum.c \
-       src/bouncing_ball.c
+       src/bouncing_ball.c \
+       src/animal.c
 
 OBJS = $(SRCS:.c=.o)
 
