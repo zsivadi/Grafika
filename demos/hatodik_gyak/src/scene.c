@@ -140,9 +140,31 @@ void render_scene(const Scene* scene)
         draw_6_faced_cube(scene->textures);
     glPopMatrix();
 
+    /*
     glPushMatrix();
         glTranslatef(scene->model_x, scene->model_y, 0.0f);
         draw_model(&(scene->cat));
+    glPopMatrix();
+    */
+
+    glPushMatrix();
+        glTranslatef(scene->model_x, scene->model_y, 0.0f);
+
+        int frame_index = ((int)(scene->rotation / 20.0f)) % 4;
+        glBindTexture(GL_TEXTURE_2D, scene->textures[frame_index + 1]);
+
+        glMatrixMode(GL_TEXTURE);
+        glPushMatrix();
+
+        glTranslatef(scene->rotation * 0.02f, scene->rotation * 0.01f, 0.0f);
+        glMatrixMode(GL_MODELVIEW);
+
+        draw_model(&(scene->cat));
+
+        glMatrixMode(GL_TEXTURE);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+
     glPopMatrix();
  
 }
