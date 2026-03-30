@@ -10,7 +10,8 @@ SRCS = src/main.c \
        src/camera.c \
        src/scene.c \
        src/utils.c \
-       src/pendulum.c
+       src/pendulum.c \
+       src/bouncing_ball.c
 
 OBJS = $(SRCS:.c=.o)
 

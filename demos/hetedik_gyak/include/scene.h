@@ -3,8 +3,7 @@
 
 #include "camera.h"
 #include "pendulum.h"
-
-// #include "bouncing_ball.h"
+#include "bouncing_ball.h"
 // #include "animal.h"
 
 #include <obj/model.h>
@@ -14,7 +13,7 @@ typedef struct Scene
     Material material;
     
     Pendulum pendulum;
-    // BouncingBall ball;
+    BouncingBall ball;
     // Animal animal;
     
 } Scene;

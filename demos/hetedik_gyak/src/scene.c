@@ -19,6 +19,7 @@ void init_scene(Scene* scene) {
     scene->material.shininess = 0.0f;
 
     init_pendulum(&(scene->pendulum), 0.0f, 0.0f, 4.0f);
+    init_bouncing_ball(&(scene->ball), -4.0f, -4.0f, 5.0f);
 }
 
 void set_lighting() {
@@ -62,7 +63,9 @@ void set_material(const Material* material) {
 }
 
 void update_scene(Scene* scene, double time) {
+
     update_pendulum(&(scene->pendulum), time);
+    update_bouncing_ball(&(scene->ball), time);
 }
 
 void render_scene(const Scene* scene) {
@@ -73,6 +76,21 @@ void render_scene(const Scene* scene) {
     draw_origin();
 
     render_pendulum(&(scene->pendulum));
+
+
+    glDisable(GL_LIGHTING);
+    glColor3f(0.3f, 0.3f, 0.3f); 
+
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, 0.0f, 1.0f); 
+        glVertex3f(-10.0f, -10.0f, 0.0f); 
+        glVertex3f( 10.0f, -10.0f, 0.0f);
+        glVertex3f( 10.0f,  10.0f, 0.0f);
+        glVertex3f(-10.0f,  10.0f, 0.0f);
+    glEnd();
+    glEnable(GL_LIGHTING);
+
+    render_bouncing_ball(&(scene->ball));
 }
 
 void draw_origin() {
