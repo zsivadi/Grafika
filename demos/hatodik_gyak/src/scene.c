@@ -13,11 +13,11 @@ void init_scene(Scene* scene)
     //scene->texture_id = load_texture("assets/textures/cube.png");
     //glBindTexture(GL_TEXTURE_2D, scene->texture_id);
 
-    scene->textures[0] = load_texture("assets/textures/yellow.png");
+    scene->textures[0] = generate_procedural_texture(1);
     scene->textures[1] = load_texture("assets/textures/yellow.png");
-    scene->textures[2] = load_texture("assets/textures/green.png");
+    scene->textures[2] = generate_procedural_texture(2);
     scene->textures[3] = load_texture("assets/textures/green.png");
-    scene->textures[4] = load_texture("assets/textures/cyan.png");
+    scene->textures[4] = generate_procedural_texture(3);
     scene->textures[5] = load_texture("assets/textures/cyan.png");
 
     scene->model_x = 2.0f; 
@@ -168,7 +168,7 @@ void draw_origin()
 
 void draw_6_faced_cube(const GLuint textures[6]) { 
 
-    float s = 1.0f;
+    float s = 0.5f;
 
     // Előlap
 

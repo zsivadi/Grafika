@@ -10,4 +10,8 @@ typedef GLubyte Pixel[3];
  */
 GLuint load_texture(char* filename);
 
+// Function for pre-coded procedural texture generating options
+
+GLuint generate_procedural_texture(int type);
+
 #endif /* TEXTURE_H */
