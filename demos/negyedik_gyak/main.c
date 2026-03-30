@@ -6,6 +6,8 @@
 int main(int argc, char* argv[])
 {
     Game game;
+    (void)argc; 
+    (void)argv; 
 
     init_game(&game, 800, 600);
     while (game.is_running) {

@@ -1,5 +1,6 @@
 #ifndef BALL_H
 #define BALL_H
+#include <GL/gl.h>
 
 /**
  * Ball position and speed
@@ -12,12 +13,13 @@ typedef struct Ball
     float speed_x;
     float speed_y;
     float angle;
+    GLuint texture_id;
 } Ball;
 
 /**
  * Move the ball to the given position.
  */
-void init_ball(Ball* ball, float x, float y, float angle);
+void init_ball(Ball* ball, float x, float y, float angle, GLuint texture_id);
 
 /**
  * Update the ball.

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <GL/gl.h>
 
+#include "texture.h"
+
 #define LEFT_WALL 50
 #define RIGHT_WALL (pong->width - 50)
 
@@ -11,9 +13,13 @@ void init_pong(Pong* pong, int width, int height, int left_score, int right_scor
     pong->height = height;
     pong->left_score = left_score;
     pong->right_score = right_score;
+
+    pong->bg_texture = load_texture("assets/textures/background.png");
+    GLuint ball_tex = load_texture("assets/textures/ball.png");
+
     init_pad(&(pong->left_pad), 0, height, RED_THEME);
     init_pad(&(pong->right_pad), width - 50, height, GREEN_THEME);
-    init_ball(&(pong->ball), width / 2, height / 2, 15.0);
+    init_ball(&(pong->ball), width / 2, height / 2, 15.0, ball_tex);
 
 }
 
@@ -28,6 +34,17 @@ void update_pong(Pong* pong, double time)
 
 void render_pong(Pong* pong)
 {
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBindTexture(GL_TEXTURE_2D, pong->bg_texture);
+    
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f(pong->width, 0);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f(pong->width, pong->height);
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(0, pong->height);
+    glEnd();
+
 
     render_score(pong);
 

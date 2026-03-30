@@ -34,9 +34,6 @@ void destroy_game(Game* game)
 void handle_game_events(Game* game)
 {
     SDL_Event event;
-    static bool is_mouse_down = false;
-    static int mouse_x = 0;
-    static int mouse_y = 0;
     int x;
     int y;
 
@@ -156,4 +153,6 @@ void init_opengl(Game* game)
     glLoadIdentity();
     glOrtho(0, game->width, game->height, 0, -200, 200);
     glViewport(0, 0, game->width, game->height);
+
+    glEnable(GL_TEXTURE_2D);
 }

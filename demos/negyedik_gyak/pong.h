@@ -1,5 +1,6 @@
 #ifndef PONG_H
 #define PONG_H
+#include <GL/gl.h>
 
 #include "ball.h"
 #include "pad.h"
@@ -18,6 +19,7 @@ typedef struct Pong
     Pad right_pad;
     int left_score;
     int right_score;
+    GLuint bg_texture;
 } Pong;
 
 /**
