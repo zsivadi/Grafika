@@ -10,8 +10,15 @@ void init_scene(Scene* scene)
     load_model(&(scene->cat), "assets/models/cat.obj");
 
 
-    scene->texture_id = load_texture("assets/textures/cube.png");
-    glBindTexture(GL_TEXTURE_2D, scene->texture_id);
+    //scene->texture_id = load_texture("assets/textures/cube.png");
+    //glBindTexture(GL_TEXTURE_2D, scene->texture_id);
+
+    scene->textures[0] = load_texture("assets/textures/yellow.png");
+    scene->textures[1] = load_texture("assets/textures/yellow.png");
+    scene->textures[2] = load_texture("assets/textures/green.png");
+    scene->textures[3] = load_texture("assets/textures/green.png");
+    scene->textures[4] = load_texture("assets/textures/cyan.png");
+    scene->textures[5] = load_texture("assets/textures/cyan.png");
 
     scene->model_x = 2.0f; 
     scene->model_y = 0.0f;
@@ -130,7 +137,7 @@ void render_scene(const Scene* scene)
 
     glPushMatrix();
         glTranslatef(-2.0f, 0.0f, 0.0f);
-        draw_model(&(scene->cube));
+        draw_6_faced_cube(scene->textures);
     glPopMatrix();
 
     glPushMatrix();
@@ -157,4 +164,76 @@ void draw_origin()
     glVertex3f(0, 0, 1);
 
     glEnd();
+}
+
+void draw_6_faced_cube(const GLuint textures[6]) { 
+
+    float s = 1.0f;
+
+    // Előlap
+
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, 0.0f, 1.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-s, -s,  s);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( s, -s,  s);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( s,  s,  s);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-s,  s,  s);
+    glEnd();
+
+    // Hátlap
+
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, 0.0f, -1.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-s, -s, -s);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-s,  s, -s);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( s,  s, -s);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( s, -s, -s);
+    glEnd();
+
+    // Bal oldal
+
+    glBindTexture(GL_TEXTURE_2D, textures[2]);
+    glBegin(GL_QUADS);
+        glNormal3f(-1.0f, 0.0f, 0.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-s, -s, -s);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-s, -s,  s);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-s,  s,  s);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-s,  s, -s);
+    glEnd();
+
+    // Jobb oldal 
+
+    glBindTexture(GL_TEXTURE_2D, textures[3]);
+    glBegin(GL_QUADS);
+        glNormal3f(1.0f, 0.0f, 0.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( s, -s, -s);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( s,  s, -s);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( s,  s,  s);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( s, -s,  s);
+    glEnd();    
+
+    // Teteje 
+
+    glBindTexture(GL_TEXTURE_2D, textures[4]);
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, 1.0f, 0.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-s,  s, -s);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-s,  s,  s);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( s,  s,  s);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( s,  s, -s);
+    glEnd();
+
+    // Alja
+
+    glBindTexture(GL_TEXTURE_2D, textures[5]);
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, -1.0f, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-s, -s, -s);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( s, -s, -s);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( s, -s,  s);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-s, -s,  s);
+    glEnd();
+
 }

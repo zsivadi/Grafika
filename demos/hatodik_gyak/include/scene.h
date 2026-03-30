@@ -11,7 +11,7 @@ typedef struct Scene
     Model cube;
     Model cat;
     Material material;
-    GLuint texture_id;
+    GLuint textures[6];
 
     float rotation;
     float model_x;
@@ -47,5 +47,9 @@ void render_scene(const Scene* scene);
  * Draw the origin of the world coordinate system.
  */
 void draw_origin();
+
+// Draw the cube with 6 textures
+
+void draw_6_faced_cube(const GLuint textures[6]);
 
 #endif /* SCENE_H */
