@@ -60,7 +60,7 @@ void init_opengl() {
     glEnable(GL_NORMALIZE);
     glEnable(GL_AUTO_NORMAL);
 
-    glClearColor(0.05, 0.05, 0.1, 1.0);
+    glClearColor(0.2, 0.8, 1, 1.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -72,6 +72,13 @@ void init_opengl() {
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+
+    glEnable(GL_FOG);
+
+    float fogColor[] = {0.2f, 0.8f, 1.0f, 1.0f}; 
+    glFogfv(GL_FOG_COLOR, fogColor);
+    glFogi(GL_FOG_MODE, GL_EXP2); 
+    glFogf(GL_FOG_DENSITY, 0.03f); 
 }
 
 void reshape(GLsizei width, GLsizei height) {
