@@ -16,4 +16,4 @@ $(EXEC): $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(EXEC)
+	del /Q src\*.o $(EXEC).exe 2>nul || rm -f $(OBJ) $(EXEC)

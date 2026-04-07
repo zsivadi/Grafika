@@ -10,6 +10,7 @@ void init_app(App* app, int width, int height) {
     int inited_loaders;
 
     app->is_running = false;
+    app->uptime = 0.0;
 
     error_code = SDL_Init(SDL_INIT_EVERYTHING);
     if (error_code != 0) {
@@ -22,13 +23,13 @@ void init_app(App* app, int width, int height) {
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         width, height,
         SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
-
-    SDL_SetRelativeMouseMode(SDL_TRUE);
         
     if (app->window == NULL) {
         printf("[ERROR] Unable to create the application window!\n");
         return;
     }
+
+    SDL_SetRelativeMouseMode(SDL_TRUE);
 
     inited_loaders = IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
     if (inited_loaders == 0) {
@@ -38,14 +39,17 @@ void init_app(App* app, int width, int height) {
 
     app->gl_context = SDL_GL_CreateContext(app->window);
     if (app->gl_context == NULL) {
-        printf("[ERROR] Unable to create the OpenGL context!\n");
+        printf("[ERROR] Unable to create the OpenGL context: %s\n", SDL_GetError());
         return;
     }
+
+    app->uptime = (double)SDL_GetTicks() / 1000.0;
+
+    init_opengl();
 
     int actual_width, actual_height;
     SDL_GetWindowSize(app->window, &actual_width, &actual_height);
 
-    init_opengl();
     reshape(actual_width, actual_height);
 
     init_camera(&(app->camera));
@@ -151,6 +155,10 @@ void update_app(App* app) {
 
     current_time = (double)SDL_GetTicks() / 1000.0;
     elapsed_time = current_time - app->uptime;
+
+    if (elapsed_time > 0.1) elapsed_time = 0.1;
+    if (elapsed_time < 0) elapsed_time = 0;
+
     app->uptime = current_time;
 
     update_camera(&(app->camera), elapsed_time);

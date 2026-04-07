@@ -3,3 +3,7 @@
 *.o
 sdl_utils.c
 sdl_utils.h
+*.png
+*.obj
+*.mtl
+*.log

@@ -1,9 +1,16 @@
 #include "app.h"
 
 #include <stdio.h>
+#include <time.h>
 
 
 int main(int argc, char* argv[]) {
+
+    FILE *f = fopen("debug.log", "w");
+    fprintf(f, "Program started!\n");
+    fclose(f);
+
+    srand(time(NULL));
     
     App app;
 
