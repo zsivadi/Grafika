@@ -24,7 +24,7 @@ void init_camera(Camera* camera);
 /**
  * Update the position of the camera.
  */
-void update_camera(Camera* camera, double time);
+void update_camera(Camera* camera, double time, const vec3* obstacles, const float* radii, int obstacle_count, float lake_x, float lake_y, float lake_radius);
 
 /**
  * Apply the camera settings to the view transformation.

@@ -64,7 +64,7 @@ void init_opengl() {
     glEnable(GL_NORMALIZE);
     glEnable(GL_AUTO_NORMAL);
 
-    glClearColor(0.2, 0.8, 1, 1.0);
+    glClearColor(0.529, 0.808, 0.922, 1.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -79,10 +79,10 @@ void init_opengl() {
 
     glEnable(GL_FOG);
 
-    float fogColor[] = {0.2f, 0.8f, 1.0f, 1.0f}; 
+    float fogColor[] = {0.529f, 0.808f, 0.922f, 1.0f}; 
     glFogfv(GL_FOG_COLOR, fogColor);
     glFogi(GL_FOG_MODE, GL_EXP2); 
-    glFogf(GL_FOG_DENSITY, 0.03f); 
+    glFogf(GL_FOG_DENSITY, 0.0175f); 
 }
 
 void reshape(GLsizei width, GLsizei height) {
@@ -161,7 +161,19 @@ void update_app(App* app) {
 
     app->uptime = current_time;
 
-    update_camera(&(app->camera), elapsed_time);
+    vec3 positions[MAX_OBJECTS];
+    float radii[MAX_OBJECTS];
+    int count = app->scene.num_objects;
+
+    for (int i = 0; i < count; i++) {
+        positions[i] = app->scene.objects[i].position;
+        radii[i]     = app->scene.objects[i].radius;
+    }
+
+    update_camera(&(app->camera), elapsed_time,
+                  positions, radii, count,
+                  LAKE_CENTER_X, LAKE_CENTER_Y, 15.0f);
+
     update_scene(&(app->scene), elapsed_time);
 }
 

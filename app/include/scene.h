@@ -3,12 +3,17 @@
 
 #include "model.h"
 
-#define MAX_OBJECTS 600
+#define MAX_OBJECTS 750
 #define MAX_MODELS 20
+
+#define LAKE_CENTER_X 18.0f
+#define LAKE_CENTER_Y 18.0f
+#define LAKE_RADIUS   22.0f
 
 typedef struct SceneObject {
     vec3 position;
     float scale;
+    float radius;
     int model_index; 
 } SceneObject;
 

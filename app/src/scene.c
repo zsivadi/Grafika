@@ -4,7 +4,20 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <GL/gl.h>
+
+static float estimate_radius(const char* obj_path, float scale) {
+
+    float base = 1.0f;
+
+    if      (strstr(obj_path, "BirchTree")) base = 0.2f;
+    else if (strstr(obj_path, "DeadTree"))  base = 0.2f;
+    else if (strstr(obj_path, "Bush"))      base = 0.2f;
+    else if (strstr(obj_path, "Rock"))      base = 0.2f;
+
+    return base * scale;
+}
 
 void init_scene(Scene* scene) {
 
@@ -26,7 +39,8 @@ void init_scene(Scene* scene) {
         "assets/models/DeadTree_1.obj",
         "assets/models/DeadTree_2.obj",
         "assets/models/Rock_1.obj",
-        "assets/models/Rock_2.obj"
+        "assets/models/Rock_2.obj",
+        "assets/models/Rock_3.obj"
     };
 
     int num_files_to_load = sizeof(obj_files) / sizeof(obj_files[0]);
@@ -54,7 +68,7 @@ void init_scene(Scene* scene) {
             float ry = (rand() % 1400 / 10.0f) - 70.0f;
 
             float dist_clearing = sqrt(rx*rx + ry*ry);
-            float dist_lake = sqrt(pow(rx - 18.0f, 2) + pow(ry - 18.0f, 2));
+            float dist_lake = sqrt(pow(rx - LAKE_CENTER_X, 2) + pow(ry - LAKE_CENTER_Y, 2));
 
             if (dist_clearing > 20.0f && dist_lake > 24.0f) {
 
@@ -65,9 +79,13 @@ void init_scene(Scene* scene) {
                 scene->objects[i].scale = 1.1f + (rand() % 70 / 100.0f);
 
                 if (scene->num_loaded_models > 0) {
-                    scene->objects[i].model_index = rand() % scene->num_loaded_models;
+
+                    int idx = rand() % scene->num_loaded_models;
+                    scene->objects[i].model_index = idx;
+                    scene->objects[i].radius = estimate_radius(obj_files[idx], scene->objects[i].scale);
                 } else {
                     scene->objects[i].model_index = -1;
+                    scene->objects[i].radius = 1.0f;
                 }
                 valid_pos = true;
             }
@@ -100,9 +118,9 @@ void render_scene(const Scene* scene) {
     float size = 70.0f;
     float step = 2.0f; 
 
-    float lakeCenterX = 18.0f;
-    float lakeCenterY = 18.0f;
-    float lakeRadius = 22.0f;
+    float lakeCenterX = LAKE_CENTER_X;
+    float lakeCenterY = LAKE_CENTER_Y;
+    float lakeRadius  = LAKE_RADIUS;
     float maxDepth = 4.0f;
 
     float clearingColor[3] = {0.45f, 0.4f,  0.25f};
