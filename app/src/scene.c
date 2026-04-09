@@ -21,7 +21,7 @@ static float estimate_radius(const char* obj_path, float scale) {
 
 void init_scene(Scene* scene) {
 
-    scene->uptime = 0.0;
+    scene->uptime = 60.0;
     scene->num_loaded_models = 0;
 
     const char* obj_files[] = {
@@ -106,7 +106,25 @@ float smoothstep(float edge0, float edge1, float x) {
     return t * t * (3.0f - 2.0f * t);
 }
 
-void render_scene(const Scene* scene) {
+
+static int is_visible(const Camera* camera, float ox, float oy, float obj_radius) {
+
+    float cam_angle = (float)(camera->rotation.z * M_PI / 180.0);
+    float fwd_x = cosf(cam_angle);
+    float fwd_y = sinf(cam_angle);
+
+    float dx = ox - camera->position.x;
+    float dy = oy - camera->position.y;
+    float dist = sqrtf(dx*dx + dy*dy);
+
+    if (dist < obj_radius + 2.0f) return 1;
+
+    float dot = (dx * fwd_x + dy * fwd_y) / dist;
+
+    return dot > -0.3f;
+}
+
+void render_scene(const Scene* scene, const Camera* camera) {
 
     glEnable(GL_COLOR_MATERIAL);
 
@@ -232,17 +250,34 @@ void render_scene(const Scene* scene) {
     }
     glDisable(GL_BLEND);
 
-    // Draw objects
-    
+    // Draw objects with LOD and frustum culling
+
     glEnable(GL_TEXTURE_2D);
     for (int i = 0; i < scene->num_objects; i++) {
 
+        float ox = scene->objects[i].position.x;
+        float oy = scene->objects[i].position.y;
+
+        float dx = ox - camera->position.x;
+        float dy = oy - camera->position.y;
+        float dist = sqrtf(dx*dx + dy*dy);
+
+        if (dist > LOD_SKIP_DIST) continue;
+
+        if (!is_visible(camera, ox, oy, scene->objects[i].radius + 2.0f)) continue;
+
+        if (dist > LOD_FULL_DIST) {
+
+            float obj_radius = scene->objects[i].radius;
+            if (obj_radius < 0.5f) continue;
+        }
+
         glPushMatrix();
         
-        glTranslatef(scene->objects[i].position.x, scene->objects[i].position.y, scene->objects[i].position.z);
+        glTranslatef(ox, oy, scene->objects[i].position.z);
         glScalef(scene->objects[i].scale, scene->objects[i].scale, scene->objects[i].scale);
 
-        float rotation_angle = (scene->objects[i].position.x * scene->objects[i].position.y) * 100.0f;
+        float rotation_angle = (ox * oy) * 100.0f;
         glRotatef(rotation_angle, 0.0f, 0.0f, 1.0f);
 
         glRotatef(90.0f, 1.0f, 0.0f, 0.0f); 

@@ -3,6 +3,7 @@
 #include <GL/gl.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
+#include <math.h>
 
 void init_app(App* app, int width, int height) {
     
@@ -78,11 +79,8 @@ void init_opengl() {
     glEnable(GL_LIGHT0);
 
     glEnable(GL_FOG);
-
-    float fogColor[] = {0.529f, 0.808f, 0.922f, 1.0f}; 
-    glFogfv(GL_FOG_COLOR, fogColor);
-    glFogi(GL_FOG_MODE, GL_EXP2); 
-    glFogf(GL_FOG_DENSITY, 0.0175f); 
+    glFogi(GL_FOG_MODE, GL_EXP2);
+    glFogf(GL_FOG_DENSITY, 0.0175f);
 }
 
 void reshape(GLsizei width, GLsizei height) {
@@ -93,6 +91,198 @@ void reshape(GLsizei width, GLsizei height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum(-.08 * ratio, .08 * ratio, -.08, .08, .1, 1000.0);
+}
+
+static void lerp_color(float* out, const float* a, const float* b, float t) {
+
+    out[0] = a[0] + (b[0] - a[0]) * t;
+    out[1] = a[1] + (b[1] - a[1]) * t;
+    out[2] = a[2] + (b[2] - a[2]) * t;
+}
+
+static void draw_celestial_body(float x, float y, float z, float r, float g, float b, float radius) {
+
+    glPushMatrix();
+    glTranslatef(x, y, z);
+
+    float modelview[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+
+    modelview[0] = 1.0f; modelview[1] = 0.0f; modelview[2] = 0.0f;
+    modelview[4] = 0.0f; modelview[5] = 1.0f; modelview[6] = 0.0f;
+    modelview[8] = 0.0f; modelview[9] = 0.0f; modelview[10] = 1.0f;
+
+    glLoadMatrixf(modelview);
+
+    
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_FOG);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    int segments = 32;
+    float pi2 = (float)(2.0 * M_PI);
+
+    glColor4f(r, g, b, 1.0f);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(0, 0, 0);
+
+    for (int i = 0; i <= segments; i++) {
+
+        float a = i * pi2 / segments;
+        glVertex3f(cosf(a) * radius, sinf(a) * radius, 0);
+    }
+    glEnd();
+
+    glColor4f(r * 1.2f > 1.0f ? 1.0f : r * 1.2f,
+              g * 1.2f > 1.0f ? 1.0f : g * 1.2f,
+              b * 1.2f > 1.0f ? 1.0f : b * 1.2f,
+              0.15f);
+
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(0, 0, 0);
+
+    for (int i = 0; i <= segments; i++) {
+
+        float a = i * pi2 / segments;
+        glVertex3f(cosf(a) * radius * 2.2f, sinf(a) * radius * 2.2f, 0);
+    }
+    glEnd();
+
+    glDisable(GL_BLEND);
+    glEnable(GL_FOG);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+
+    glPopMatrix();
+}
+
+static void update_sky(double uptime, float* out_sun_x, float* out_sun_y, float* out_sun_z) {
+
+    double day_phase = fmod(uptime, DAY_DURATION) / DAY_DURATION;
+
+    float sun_angle  = (float)(day_phase * 2.0 * M_PI - M_PI_2);
+    float moon_angle = sun_angle + (float)M_PI;
+
+    float orbit = 180.0f;
+
+    float sun_x =  cosf(sun_angle) * orbit;
+    float sun_z =  sinf(sun_angle) * orbit;
+    float moon_x = cosf(moon_angle) * orbit;
+    float moon_z = sinf(moon_angle) * orbit;
+
+    if (out_sun_x) *out_sun_x = sun_x;
+    if (out_sun_y) *out_sun_y = 0.0f;
+    if (out_sun_z) *out_sun_z = sun_z;
+
+    float light_pos[] = { sun_x, 0.0f, sun_z, 1.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+
+    float sky_day[]     = { 0.529f, 0.808f, 0.922f };
+    float sky_sunrise[] = { 0.95f,  0.45f,  0.15f  };
+    float sky_night[]   = { 0.02f,  0.02f,  0.08f  };
+
+    float sun_diffuse_day[]     = { 1.0f,  0.95f, 0.85f, 1.0f };
+    float sun_diffuse_sunrise[] = { 1.0f,  0.55f, 0.2f,  1.0f };
+    float sun_diffuse_night[]   = { 0.05f, 0.05f, 0.15f, 1.0f };
+
+    float ambient_day[]   = { 0.35f, 0.35f, 0.35f, 1.0f };
+    float ambient_night[] = { 0.03f, 0.03f, 0.08f, 1.0f };
+
+    float sky[3], diffuse[4], ambient[4];
+    float t;
+
+    if (day_phase < 0.20f) {
+
+        lerp_color(sky, sky_night, sky_night, 0.0f);
+        for (int i = 0; i < 4; i++) diffuse[i] = sun_diffuse_night[i];
+        for (int i = 0; i < 4; i++) ambient[i] = ambient_night[i];
+
+    } else if (day_phase < 0.30f) {
+
+        t = (float)((day_phase - 0.20) / 0.10);
+        lerp_color(sky, sky_night, sky_sunrise, t);
+        
+        for (int i = 0; i < 3; i++) diffuse[i] = sun_diffuse_night[i] + (sun_diffuse_sunrise[i] - sun_diffuse_night[i]) * t;
+        diffuse[3] = 1.0f;
+        
+        for (int i = 0; i < 3; i++) ambient[i] = ambient_night[i] + (ambient_day[i] - ambient_night[i]) * t;
+        ambient[3] = 1.0f;
+
+    } else if (day_phase < 0.40f) {
+
+        t = (float)((day_phase - 0.30) / 0.10);
+        lerp_color(sky, sky_sunrise, sky_day, t);
+       
+        for (int i = 0; i < 3; i++) diffuse[i] = sun_diffuse_sunrise[i] + (sun_diffuse_day[i] - sun_diffuse_sunrise[i]) * t;
+        diffuse[3] = 1.0f;
+        
+        for (int i = 0; i < 4; i++) ambient[i] = ambient_day[i];
+
+    } else if (day_phase < 0.70f) {
+
+        lerp_color(sky, sky_day, sky_day, 0.0f);
+
+        for (int i = 0; i < 4; i++) diffuse[i] = sun_diffuse_day[i];
+        for (int i = 0; i < 4; i++) ambient[i] = ambient_day[i];
+
+    } else if (day_phase < 0.80f) {
+
+        t = (float)((day_phase - 0.70) / 0.10);
+        lerp_color(sky, sky_day, sky_sunrise, t);
+        
+        for (int i = 0; i < 3; i++) diffuse[i] = sun_diffuse_day[i] + (sun_diffuse_sunrise[i] - sun_diffuse_day[i]) * t;
+        diffuse[3] = 1.0f;
+        
+        for (int i = 0; i < 3; i++) ambient[i] = ambient_day[i] + (ambient_night[i] - ambient_day[i]) * t;
+        ambient[3] = 1.0f;
+
+    } else if (day_phase < 0.90f) {
+
+        t = (float)((day_phase - 0.80) / 0.10);
+        lerp_color(sky, sky_sunrise, sky_night, t);
+        
+        for (int i = 0; i < 3; i++) diffuse[i] = sun_diffuse_sunrise[i] + (sun_diffuse_night[i] - sun_diffuse_sunrise[i]) * t;
+        diffuse[3] = 1.0f;
+        
+        for (int i = 0; i < 4; i++) ambient[i] = ambient_night[i];
+
+    } else {
+
+        lerp_color(sky, sky_night, sky_night, 0.0f);
+
+        for (int i = 0; i < 4; i++) diffuse[i] = sun_diffuse_night[i];
+        for (int i = 0; i < 4; i++) ambient[i] = ambient_night[i];
+
+    }
+
+    glClearColor(sky[0], sky[1], sky[2], 1.0f);
+
+    float fog_color[] = { sky[0], sky[1], sky[2], 1.0f };
+    glFogfv(GL_FOG_COLOR, fog_color);
+
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, diffuse);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+
+    float sun_alpha  = sun_z  > -20.0f ? 1.0f : 0.0f;
+    float moon_alpha = moon_z > -20.0f ? 1.0f : 0.0f;
+
+    if (sun_alpha > 0.0f) {
+
+        float sun_r = diffuse[0] * 1.5f > 1.0f ? 1.0f : diffuse[0] * 1.5f;
+        float sun_g = diffuse[1];
+        float sun_b = diffuse[2] * 0.3f;
+        draw_celestial_body(sun_x, 0.0f, sun_z, sun_r, sun_g, sun_b, 8.0f);
+    }
+
+    if (moon_alpha > 0.0f) {
+        draw_celestial_body(moon_x, 0.0f, moon_z, 0.85f, 0.88f, 0.95f, 5.0f);
+    }
 }
 
 void handle_app_events(App* app) {
@@ -184,11 +374,8 @@ void render_app(App* app) {
 
     glPushMatrix();
         set_view(&(app->camera));
-
-        float light_position[] = { 0.0f, 0.0f, 50.0f, 1.0f }; 
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-        render_scene(&(app->scene));
+        update_sky(app->scene.uptime, NULL, NULL, NULL);
+        render_scene(&(app->scene), &(app->camera));
     glPopMatrix();
 
     render_crosshair();

@@ -10,6 +10,8 @@
 
 #define VIEWPORT_RATIO (4.0 / 3.0)
 
+#define DAY_DURATION 120.0
+
 typedef struct App {
     SDL_Window* window;
     SDL_GLContext gl_context;
