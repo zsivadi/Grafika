@@ -1,9 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-/**
- * GLSL-like three dimensional vector
- */
+// GLSL-like three dimensional vector
 
 typedef struct vec3 {
     float x;
@@ -11,9 +9,8 @@ typedef struct vec3 {
     float z;
 } vec3;
 
-/**
- * Color with RGB components
- */
+
+// Color with RGB components
 
 typedef struct Color {
     float red;
@@ -21,9 +18,8 @@ typedef struct Color {
     float blue;
 } Color;
 
-/**
- * Calculates radian from degree.
- */
+// Calc radian from degree
+
 double degree_to_radian(double degree);
 
 #endif /* UTILS_H */

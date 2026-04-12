@@ -5,6 +5,8 @@
 #include <string.h>
 #include <SDL2/SDL_image.h>
 
+// Texture loading function
+
 static GLuint load_texture(const char* filename) {
 
     SDL_Surface* surface = IMG_Load(filename);
@@ -42,7 +44,6 @@ static GLuint load_texture(const char* filename) {
     return tid;
 }
 
-
 // Load the texture by material name
 
 static GLuint load_texture_by_material_name(const char* mat_name) {
@@ -51,16 +52,63 @@ static GLuint load_texture_by_material_name(const char* mat_name) {
     snprintf(path, sizeof(path), "assets/textures/%s.png", mat_name);
 
     GLuint tid = load_texture(path);
-
     if (tid != 0) return tid;
 
-    /* Fallback: .jpg */
-
     snprintf(path, sizeof(path), "assets/textures/%s.jpg", mat_name);
-    return load_texture(path);
+    tid = load_texture(path);
+    if (tid != 0) return tid;
+
+    return 0;
 }
 
-// Load texture names from .mtl files
+// Fallback:
+// If there's no map_Kd try _BaseColor and _Diffuse without suffixes
+// Also try mat_name search
+
+static GLuint load_texture_with_fallbacks(const char* tex_filename, const char* mat_name) {
+
+    char path[512];
+    snprintf(path, sizeof(path), "assets/textures/%s", tex_filename);
+
+    GLuint tid = load_texture(path);
+    if (tid != 0) return tid;
+
+    // Cropping suffix
+
+    const char* suffixes[] = { "_BaseColor", "_Diffuse", "_diffuse", "_albedo", NULL };
+    char base[256];
+    strncpy(base, tex_filename, 255);
+    base[255] = '\0';
+
+    // Cropping file extension
+
+    char* dot = strrchr(base, '.');
+    const char* ext = dot ? dot : ".png";
+    if (dot) *dot = '\0';
+
+    for (int s = 0; suffixes[s] != NULL; s++) {
+
+        int slen = (int)strlen(suffixes[s]);
+        int blen = (int)strlen(base);
+
+        if (blen > slen && strcmp(base + blen - slen, suffixes[s]) == 0) {
+
+            char stripped[256];
+            strncpy(stripped, base, blen - slen);
+            stripped[blen - slen] = '\0';
+
+            snprintf(path, sizeof(path), "assets/textures/%s%s", stripped, ext);
+            tid = load_texture(path);
+            if (tid != 0) return tid;
+        }
+    }
+
+    // Last fallback: try by material name
+
+    return load_texture_by_material_name(mat_name);
+}
+
+// Load texture names and Kd colors from .mtl files
 
 static int load_materials(Material* materials, const char* mtl_path) {
 
@@ -88,21 +136,27 @@ static int load_materials(Material* materials, const char* mtl_path) {
 
             materials[current].name[63] = '\0';
             materials[current].texture_id = 0;
+            materials[current].kd[0] = 0.8f;
+            materials[current].kd[1] = 0.8f;
+            materials[current].kd[2] = 0.8f;
+
+        } else if (strncmp(line, "Kd ", 3) == 0 && current >= 0) {
+
+            sscanf(line, "Kd %f %f %f",
+                &materials[current].kd[0],
+                &materials[current].kd[1],
+                &materials[current].kd[2]);
 
         } else if (strncmp(line, "map_Kd ", 7) == 0 && current >= 0) {
             
             const char* tex_file = line + 7;
-            
-            const char* slash = strrchr(tex_file, '/');
+            const char* slash  = strrchr(tex_file, '/');
             const char* bslash = strrchr(tex_file, '\\');
-
             const char* sep = slash > bslash ? slash : bslash;
 
             if (sep) tex_file = sep + 1;
 
-            char tex_path[512];
-            snprintf(tex_path, sizeof(tex_path), "assets/textures/%s", tex_file);
-            materials[current].texture_id = load_texture(tex_path);
+            materials[current].texture_id = load_texture_with_fallbacks(tex_file, materials[current].name);
         }
     }
     fclose(f);
@@ -111,13 +165,21 @@ static int load_materials(Material* materials, const char* mtl_path) {
 
         if (materials[i].texture_id == 0) {
 
-            printf("[INFO] Cannot find mk_d: %s\n", materials[i].name);
             materials[i].texture_id = load_texture_by_material_name(materials[i].name);
+
+            if (materials[i].texture_id == 0) {
+
+                printf("[INFO] Material '%s' uses Kd color (%.2f, %.2f, %.2f)\n",
+                       materials[i].name,
+                       materials[i].kd[0], materials[i].kd[1], materials[i].kd[2]);
+            }
         }
     }
 
     return n;
 }
+
+// Loading the models from assets
 
 bool load_model(Model* model, const char* obj_path) {
 
@@ -142,8 +204,7 @@ bool load_model(Model* model, const char* obj_path) {
         else if (strncmp(line, "vt ", 3) == 0) model->n_texcoords++;
         else if (strncmp(line, "vn ", 3) == 0) model->n_normals++;
         else if (strncmp(line, "f ",  2) == 0) model->n_faces += 2;
-        else if (strncmp(line, "mtllib ", 7) == 0)
-            sscanf(line, "mtllib %255s", mtl_filename);
+        else if (strncmp(line, "mtllib ", 7) == 0) sscanf(line, "mtllib %255s", mtl_filename);
     }
 
     model->vertices  = (vec3*)malloc(model->n_vertices  * sizeof(vec3));
@@ -154,7 +215,6 @@ bool load_model(Model* model, const char* obj_path) {
     if (strlen(mtl_filename) > 0) {
 
         char mtl_path[512];
-
         snprintf(mtl_path, sizeof(mtl_path), "assets/models/%s", mtl_filename);
         model->n_materials = load_materials(model->materials, mtl_path);
     }
@@ -193,7 +253,7 @@ bool load_model(Model* model, const char* obj_path) {
 
             char mat_name[64];
             sscanf(line, "usemtl %63s", mat_name);
-            current_mat = 0; 
+            current_mat = 0;
 
             for (int i = 0; i < model->n_materials; i++) {
 
@@ -254,13 +314,21 @@ bool load_model(Model* model, const char* obj_path) {
 
             glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, tid);
-
             glEnable(GL_ALPHA_TEST);
             glAlphaFunc(GL_GREATER, 0.3f);
+            glColor3f(1.0f, 1.0f, 1.0f);
+
         } else {
 
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_ALPHA_TEST);
+
+            if (model->n_materials > 0) {
+                
+                glColor3f(model->materials[m].kd[0],
+                          model->materials[m].kd[1],
+                          model->materials[m].kd[2]);
+            }
         }
 
         glBegin(GL_TRIANGLES);
@@ -278,7 +346,7 @@ bool load_model(Model* model, const char* obj_path) {
 
                 if (fv.vt > 0 && fv.vt <= model->n_texcoords)
                     glTexCoord2f(model->texcoords[fv.vt-1].x,
-                                 model->texcoords[fv.vt-1].y);
+                                 1.0f - model->texcoords[fv.vt-1].y);
 
                 if (fv.v  > 0 && fv.v  <= model->n_vertices)
                     glVertex3f(model->vertices[fv.v-1].x,
@@ -290,6 +358,7 @@ bool load_model(Model* model, const char* obj_path) {
     }
 
     glDisable(GL_ALPHA_TEST);
+    glColor3f(1.0f, 1.0f, 1.0f);
     glEndList();
 
     free(model->vertices);  model->vertices  = NULL;
@@ -297,7 +366,7 @@ bool load_model(Model* model, const char* obj_path) {
     free(model->normals);   model->normals   = NULL;
     free(model->faces);     model->faces     = NULL;
 
-    printf("[INFO] Model OK: %s (%d tri, %d amaterial)\n",
+    printf("[INFO] Model OK: %s (%d tri, %d material)\n",
            obj_path, f_idx, model->n_materials);
     return true;
 }

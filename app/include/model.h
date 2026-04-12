@@ -19,6 +19,7 @@ typedef struct {
 typedef struct {
     char name[64];       
     GLuint texture_id;
+    float kd[3];
 } Material;
 
 typedef struct {
@@ -34,8 +35,16 @@ typedef struct {
     GLuint display_list;
 } Model;
 
+// Load 3D model from Wavefront OBJ file with materials and textures
+
 bool load_model(Model* model, const char* obj_path);
+
+// Render the model using its compiled display list
+
 void draw_model(const Model* model);
+
+// Free allocated memory and OpenGL resources for the model
+
 void free_model(Model* model);
 
 #endif /* MODEL_H */
