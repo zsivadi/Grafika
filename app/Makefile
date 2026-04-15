@@ -5,7 +5,7 @@ SRC = $(wildcard src/*.c)
 OBJ = $(SRC:.c=.o)
 
 EXEC = camping_project
-LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lopengl32 -lglu32 -lm
+LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lopengl32 -lm
 
 all: $(EXEC)
 

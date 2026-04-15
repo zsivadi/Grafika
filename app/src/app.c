@@ -92,6 +92,8 @@ void init_opengl() {
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, GL_EXP2);
     glFogf(GL_FOG_DENSITY, 0.0175f);
+
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 }
 
 void reshape(GLsizei width, GLsizei height) {
