@@ -1,12 +1,12 @@
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
+#include "settings.h"
+
 #include "scene.h"
 #include <GL/gl.h>
 
 // Terrain generation parameters
-
-#define TERRAIN_MAX_HEIGHT 3.0f
 
 // Smoothstep interpolation function
 

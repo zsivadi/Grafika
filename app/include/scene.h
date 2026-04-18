@@ -1,30 +1,14 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include "settings.h"
+
 #include "model.h"
 #include "camera.h"
 
 // Terrain and rendering parameters
 
-#define CHUNK_SIZE 60.0f
-#define RENDER_DISTANCE 1 
 #define MAX_ACTIVE_CHUNKS ((RENDER_DISTANCE * 2 + 1) * (RENDER_DISTANCE * 2 + 1))
-#define MAX_CHUNK_OBJECTS 150 
-
-// Global limits
-
-#define MAX_MODELS 25
-
-// Lake geometry boundaries
-
-#define LAKE_CENTER_X 18.0f
-#define LAKE_CENTER_Y 18.0f
-#define LAKE_RADIUS   22.0f
-
-// Level of Detail (LOD) distances
-
-#define LOD_FULL_DIST  60.0f
-#define LOD_SKIP_DIST  120.0f
 
 // Campfire coordinates
 

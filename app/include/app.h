@@ -1,7 +1,10 @@
 #ifndef APP_H
 #define APP_H
 
+#include "settings.h"
+
 #include <GL/gl.h>
+
 #include "camera.h"
 #include "scene.h"
 
@@ -9,8 +12,6 @@
 #include <stdbool.h>
 
 // Length of the day
-
-#define DAY_DURATION 120.0
 
 typedef struct App {
     SDL_Window* window;

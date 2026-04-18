@@ -1,8 +1,11 @@
 #include "app.h"
 #include "font8x8.h"
 
+#include "settings.h"
+
 #include <GL/gl.h>
 #include <SDL2/SDL_image.h>
+
 #include <stdio.h>
 #include <math.h>
 
@@ -68,7 +71,7 @@ void init_app(App* app, int width, int height) {
     app->time_paused = false;
     app->time_slider = 60.0f;
     app->fire_brightness = 1.0f;
-    app->fog_density = 0.0175f;
+    app->fog_density = FOG_DENSITY_DEFAULT;
     app->dragging_slider = 0;
 
     app->is_running = true;
@@ -80,7 +83,7 @@ void init_opengl() {
     glEnable(GL_NORMALIZE);
     glEnable(GL_AUTO_NORMAL);
 
-    glClearColor(0.529, 0.808, 0.922, 1.0);
+    glClearColor(SKY_DAY_R, SKY_DAY_G, SKY_DAY_B, 1.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -195,9 +198,9 @@ static void update_sky(double uptime) {
     float light_pos[] = { sun_x, 0.0f, sun_z, 0.0f };
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-    float sky_day[]     = { 0.529f, 0.808f, 0.922f };
+    float sky_day[]     = { SKY_DAY_R, SKY_DAY_G, SKY_DAY_B };
     float sky_sunrise[] = { 0.95f,  0.45f,  0.15f  };
-    float sky_night[]   = { 0.02f,  0.02f,  0.08f  };
+    float sky_night[]   = { SKY_NIGHT_R, SKY_NIGHT_G, SKY_NIGHT_B };
 
     float sun_diffuse_day[]     = { 1.0f,  0.95f, 0.85f, 1.0f };
     float sun_diffuse_sunrise[] = { 1.0f,  0.55f, 0.2f,  1.0f };
@@ -311,16 +314,16 @@ void handle_app_events(App* app) {
                 SDL_SetRelativeMouseMode(app->menu_open ? SDL_FALSE : SDL_TRUE);
                 break;
             case SDL_SCANCODE_W:
-                set_camera_speed(&(app->camera), 5); 
+                set_camera_speed(&(app->camera), PLAYER_WALK_SPEED); 
                 break;
             case SDL_SCANCODE_S:
-                set_camera_speed(&(app->camera), -5);
+                set_camera_speed(&(app->camera), -PLAYER_WALK_SPEED);
                 break;
             case SDL_SCANCODE_A:
-                set_camera_side_speed(&(app->camera), 5);
+                set_camera_side_speed(&(app->camera), PLAYER_WALK_SPEED);
                 break;
             case SDL_SCANCODE_D:
-                set_camera_side_speed(&(app->camera), -5);
+                set_camera_side_speed(&(app->camera), -PLAYER_WALK_SPEED);
                 break;
             default:
                 break;
@@ -392,7 +395,7 @@ void handle_app_events(App* app) {
                     glFogf(GL_FOG_DENSITY, app->fog_density);
                 }
             } else if (!app->menu_open) {
-                rotate_camera(&(app->camera), -event.motion.xrel * 0.1, -event.motion.yrel * 0.1);
+                rotate_camera(&(app->camera), -event.motion.xrel * MOUSE_SENSITIVITY, -event.motion.yrel * MOUSE_SENSITIVITY);
             }
             break;
         case SDL_QUIT:

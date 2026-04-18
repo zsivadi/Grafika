@@ -44,7 +44,7 @@ static void load_chunk(Chunk* chunk, int cx, int cy) {
 
 void init_scene(Scene* scene) {
 
-    scene->uptime = 60.0;
+    scene->uptime = DAY_START_TIME;
     scene->num_loaded_models = 0;
     scene->fire_lit = 1;
     scene->fire_brightness = 1.0f;

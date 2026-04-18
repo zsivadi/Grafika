@@ -38,7 +38,7 @@ void update_camera(Camera* camera, double time, const vec3* obstacles, const flo
     new_x += (float)(cos(side_angle) * camera->speed.x * time);
     new_y += (float)(sin(side_angle) * camera->speed.x * time);
 
-    float player_radius = 0.5f;
+    float player_radius = PLAYER_HITBOX_RAD;
     int blocked = 0;
 
     // Check collision with obstacles (trees, rocks, etc.)
@@ -85,7 +85,7 @@ void update_camera(Camera* camera, double time, const vec3* obstacles, const flo
     
     // Camera eye height above ground
 
-    float eye_height = 1.5f;
+    float eye_height = PLAYER_EYE_HEIGHT;
     
     // Smoothly adjust camera height to follow terrain
 

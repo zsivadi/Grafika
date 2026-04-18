@@ -5,7 +5,7 @@
 
 int scene_interact(Scene* scene, const Camera* camera, double* uptime) {
 
-    float interact_dist = 2.0f;
+    float interact_dist = INTERACT_DIST;
     float cam_angle = (float)(camera->rotation.z * (float)M_PI / 180.0f);
     float look_x    = cosf(cam_angle);
     float look_y    = sinf(cam_angle);
@@ -35,7 +35,7 @@ int scene_interact(Scene* scene, const Camera* camera, double* uptime) {
 
             if (sqrtf(dtx*dtx + dty*dty) < scene->tent_radius + interact_dist) {
 
-                *uptime = 60.0;
+                *uptime = DAY_START_TIME;
                 printf("[INFO] Skipping to daytime...\n");
                 return 2;
             }
