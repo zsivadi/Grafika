@@ -7,7 +7,7 @@
 
 // Texture loading function
 
-static GLuint load_texture(const char* filename) {
+GLuint load_texture(const char* filename) {
 
     SDL_Surface* surface = IMG_Load(filename);
 

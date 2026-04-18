@@ -131,7 +131,7 @@ static void get_terrain_color(float x, float y, float height, float* r, float* g
     float dist_lake = sqrtf(dx_lake * dx_lake + dy_lake * dy_lake);
 
     float clearingColor[3] = {0.45f, 0.4f, 0.25f};  
-    float forestColor[3] = {0.02f, 0.12f, 0.02f};   
+    float forestColor[3] = {0.095f, 0.50f, 0.01f};   
     float hillColor[3] = {0.25f, 0.22f, 0.15f};     
     float rockColor[3] = {0.35f, 0.35f, 0.37f};     
 
@@ -168,7 +168,6 @@ GLuint init_terrain_chunk(int cx, int cy) {
     glNewList(list_id, GL_COMPILE);
 
     glEnable(GL_COLOR_MATERIAL);
-    glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
 
     float step = 2.0f; 
@@ -195,6 +194,7 @@ GLuint init_terrain_chunk(int cx, int cy) {
             
             glColor3f(r1, g1, b1);
             glNormal3f(nx1, ny1, nz1);
+            glTexCoord2f(x * 0.25f, y * 0.25f);
             glVertex3f(x, y, z1);
             
             float x2 = x + step;
@@ -208,6 +208,7 @@ GLuint init_terrain_chunk(int cx, int cy) {
             
             glColor3f(r2, g2, b2);
             glNormal3f(nx2, ny2, nz2);
+            glTexCoord2f(x2 * 0.25f, y * 0.25f);
             glVertex3f(x2, y, z2);
         }
 

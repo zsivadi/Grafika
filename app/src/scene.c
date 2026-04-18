@@ -82,6 +82,8 @@ void init_scene(Scene* scene) {
 
     init_camp(scene);
     init_ducks(scene->ducks);
+
+    scene->grass_texture = load_texture("assets/textures/grass_texture.jpg");
 }
 
 void update_scene(Scene* scene, const Camera* camera, double time) {
@@ -147,6 +149,9 @@ void render_scene(const Scene* scene, const Camera* camera) {
     for (int i = 0; i < MAX_ACTIVE_CHUNKS; i++) {
 
         if (scene->active_chunks[i].is_active) {
+
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, scene->grass_texture);
 
             glCallList(scene->active_chunks[i].terrain_display_list);
             

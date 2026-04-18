@@ -47,4 +47,6 @@ void draw_model(const Model* model);
 
 void free_model(Model* model);
 
+GLuint load_texture(const char* filename);
+
 #endif /* MODEL_H */

@@ -4,6 +4,7 @@
 sdl_utils.c
 sdl_utils.h
 *.png
+*.jpg
 *.obj
 *.mtl
 *.log
