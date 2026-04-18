@@ -9,15 +9,6 @@ typedef struct vec3 {
     float z;
 } vec3;
 
-
-// Color with RGB components
-
-typedef struct Color {
-    float red;
-    float green;
-    float blue;
-} Color;
-
 // Calc radian from degree
 
 double degree_to_radian(double degree);

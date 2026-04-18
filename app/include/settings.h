@@ -5,7 +5,6 @@
 #define CHUNK_SIZE          60.0f
 #define RENDER_DISTANCE     1
 #define MAX_CHUNK_OBJECTS   150
-#define TERRAIN_MAX_HEIGHT  3.0f
 #define LAKE_RADIUS         22.0f
 #define LAKE_CENTER_X       18.0f
 #define LAKE_CENTER_Y       18.0f

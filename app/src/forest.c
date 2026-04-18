@@ -1,5 +1,4 @@
 #include "forest.h"
-#include "visibility.h"
 #include "terrain.h"
 #include "lake.h"
 
@@ -23,6 +22,9 @@ void init_forest_chunk(Scene* scene, Chunk* chunk) {
         float rx = start_x + ((float)rand() / RAND_MAX) * CHUNK_SIZE;
         float ry = start_y + ((float)rand() / RAND_MAX) * CHUNK_SIZE;
 
+        float rz = get_terrain_height(rx, ry);
+        if (rz > 8.0f) continue;
+
         float dist_clearing = sqrtf(rx*rx + ry*ry);
         float dist_lake     = sqrtf(powf(rx - LAKE_CENTER_X, 2) + powf(ry - LAKE_CENTER_Y, 2));
         float dist_campfire = sqrtf(powf(rx - CAMPFIRE_X, 2) + powf(ry - CAMPFIRE_Y, 2));
@@ -33,7 +35,7 @@ void init_forest_chunk(Scene* scene, Chunk* chunk) {
 
         chunk->objects[i].position.x = rx;
         chunk->objects[i].position.y = ry;
-        chunk->objects[i].position.z = get_terrain_height(rx, ry) - 0.3f; 
+        chunk->objects[i].position.z = rz - 0.3f; 
 
         chunk->objects[i].scale = 1.0f + ((float)rand() / RAND_MAX) * 0.8f;
         chunk->objects[i].model_index = rand() % 16; 
@@ -59,7 +61,7 @@ void init_forest_chunk(Scene* scene, Chunk* chunk) {
         glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
 
         if (chunk->objects[j].model_index >= 0) {
-            draw_model(&scene->models[chunk->objects[j].model_index]); // <-- Most már elérjük a scene-t!
+            draw_model(&scene->models[chunk->objects[j].model_index]);
         }
 
         glPopMatrix();

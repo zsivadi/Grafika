@@ -1,4 +1,5 @@
 #include "terrain.h"
+
 #include <GL/gl.h>
 #include <math.h>
 
@@ -59,10 +60,11 @@ static float fractal_noise(float x, float y, int octaves, float persistence) {
 
 float get_terrain_height(float x, float y) {
 
-    float elevation = fractal_noise(x * 0.08f, y * 0.08f, 4, 0.5f);
-
-    elevation += fractal_noise(x * 0.03f, y * 0.03f, 2, 0.6f) * 0.5f;
-    elevation = (elevation - 0.5f) * TERRAIN_MAX_HEIGHT * 2.0f;
+    float n1 = fractal_noise(x * 0.015f, y * 0.015f, 4, 0.45f);
+    float n2 = fractal_noise(x * 0.06f, y * 0.06f, 3, 0.4f);
+    
+    float elevation = powf(n1, 3.0f) * 35.0f - 2.0f;
+    elevation += n2 * 1.5f;
 
     float dist_clearing = sqrtf(x * x + y * y);
 
@@ -102,26 +104,6 @@ float get_terrain_height(float x, float y) {
     return elevation;
 }
 
-static void get_terrain_normal(float x, float y, float* nx, float* ny, float* nz) {
-
-    float delta = 0.5f;
-
-    float h_center = get_terrain_height(x, y);
-    float h_right = get_terrain_height(x + delta, y);
-    float h_up = get_terrain_height(x, y + delta);
-
-    float tx = delta; float ty = 0.0f; float tz = h_right - h_center;
-    float ux = 0.0f; float uy = delta; float uz = h_up - h_center;
-
-    *nx = ty * uz - tz * uy;
-    *ny = tz * ux - tx * uz;
-    *nz = tx * uy - ty * ux;
-
-    float len = sqrtf((*nx) * (*nx) + (*ny) * (*ny) + (*nz) * (*nz));
-
-    if (len > 0.001f) { *nx /= len; *ny /= len; *nz /= len; }
-}
-
 static void get_terrain_color(float x, float y, float height, float* r, float* g, float* b) {
 
     float dist_clearing = sqrtf(x * x + y * y);
@@ -133,7 +115,7 @@ static void get_terrain_color(float x, float y, float height, float* r, float* g
     float clearingColor[3] = {0.45f, 0.4f, 0.25f};  
     float forestColor[3] = {0.095f, 0.50f, 0.01f};   
     float hillColor[3] = {0.25f, 0.22f, 0.15f};     
-    float rockColor[3] = {0.35f, 0.35f, 0.37f};     
+    float rockColor[3] = {0.35f, 0.35f, 0.37f};   
 
     float clearing_to_forest = smoothstep(5.0f, 20.0f, dist_clearing);
 
@@ -167,11 +149,7 @@ GLuint init_terrain_chunk(int cx, int cy) {
     GLuint list_id = glGenLists(1);
     glNewList(list_id, GL_COMPILE);
 
-    glEnable(GL_COLOR_MATERIAL);
-    glDisable(GL_ALPHA_TEST);
-
     float step = 2.0f; 
-
     int grid_cells = (int)(CHUNK_SIZE / step);
     int cache_size = grid_cells + 2;
     
@@ -186,26 +164,26 @@ GLuint init_terrain_chunk(int cx, int cy) {
         }
     }
 
+    glEnable(GL_COLOR_MATERIAL);
+    glDisable(GL_ALPHA_TEST);
+
+    glDisable(GL_TEXTURE_2D);
+
     for (int i = 0; i < grid_cells; i++) {
-
         glBegin(GL_QUAD_STRIP);
-
         for (int j = 0; j <= grid_cells; j++) {
-
+            
             float x1 = start_x + i * step;
             float y1 = start_y + j * step;
             float z1 = hmap[i][j]; 
-
-            float h_right1 = hmap[i + 1][j];
-            float h_up1    = hmap[i][j + 1];
             
-            float tx1 = step, ty1 = 0.0f, tz1 = h_right1 - z1;
-            float ux1 = 0.0f, uy1 = step, uz1 = h_up1 - z1;
-
+            float tx1 = step, ty1 = 0.0f, tz1 = hmap[i + 1][j] - z1;
+            float ux1 = 0.0f, uy1 = step, uz1 = hmap[i][j + 1] - z1;
+            
             float nx1 = ty1 * uz1 - tz1 * uy1;
             float ny1 = tz1 * ux1 - tx1 * uz1;
             float nz1 = tx1 * uy1 - ty1 * ux1;
-
+            
             float len1 = sqrtf(nx1*nx1 + ny1*ny1 + nz1*nz1);
             if (len1 > 0.001f) { nx1 /= len1; ny1 /= len1; nz1 /= len1; }
 
@@ -214,18 +192,14 @@ GLuint init_terrain_chunk(int cx, int cy) {
             
             glColor3f(r1, g1, b1);
             glNormal3f(nx1, ny1, nz1);
-            glTexCoord2f(x1 * 0.25f, y1 * 0.25f);
             glVertex3f(x1, y1, z1);
             
             float x2 = start_x + (i + 1) * step;
             float y2 = start_y + j * step;
             float z2 = hmap[i + 1][j];
 
-            float h_right2 = hmap[i + 2][j];
-            float h_up2    = hmap[i + 1][j + 1];
-
-            float tx2 = step, ty2 = 0.0f, tz2 = h_right2 - z2;
-            float ux2 = 0.0f, uy2 = step, uz2 = h_up2 - z2;
+            float tx2 = step, ty2 = 0.0f, tz2 = hmap[i + 2][j] - z2;
+            float ux2 = 0.0f, uy2 = step, uz2 = hmap[i + 1][j + 1] - z2;
 
             float nx2 = ty2 * uz2 - tz2 * uy2;
             float ny2 = tz2 * ux2 - tx2 * uz2;
@@ -239,13 +213,76 @@ GLuint init_terrain_chunk(int cx, int cy) {
             
             glColor3f(r2, g2, b2);
             glNormal3f(nx2, ny2, nz2);
+            glVertex3f(x2, y2, z2);
+        }
+        glEnd();
+    }
 
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthFunc(GL_EQUAL); 
+
+    for (int i = 0; i < grid_cells; i++) {
+        glBegin(GL_QUAD_STRIP);
+        for (int j = 0; j <= grid_cells; j++) {
+            
+            float x1 = start_x + i * step;
+            float y1 = start_y + j * step;
+            float z1 = hmap[i][j]; 
+            
+            float tx1 = step, ty1 = 0.0f, tz1 = hmap[i + 1][j] - z1;
+            float ux1 = 0.0f, uy1 = step, uz1 = hmap[i][j + 1] - z1;
+            
+            float nx1 = ty1 * uz1 - tz1 * uy1;
+            float ny1 = tz1 * ux1 - tx1 * uz1;
+            float nz1 = tx1 * uy1 - ty1 * ux1;
+            
+            float len1 = sqrtf(nx1*nx1 + ny1*ny1 + nz1*nz1);
+            if (len1 > 0.001f) { nx1 /= len1; ny1 /= len1; nz1 /= len1; }
+
+            float r1, g1, b1;
+            get_terrain_color(x1, y1, z1, &r1, &g1, &b1);
+            
+            float alpha1 = 1.0f;
+            if (z1 > 7.0f) alpha1 = 1.0f - smoothstep(7.0f, 9.5f, z1);
+
+            glColor4f(r1, g1, b1, alpha1);
+            glNormal3f(nx1, ny1, nz1);
+            glTexCoord2f(x1 * 0.25f, y1 * 0.25f);
+            glVertex3f(x1, y1, z1);
+            
+            float x2 = start_x + (i + 1) * step;
+            float y2 = start_y + j * step;
+            float z2 = hmap[i + 1][j];
+
+            float tx2 = step, ty2 = 0.0f, tz2 = hmap[i + 2][j] - z2;
+            float ux2 = 0.0f, uy2 = step, uz2 = hmap[i + 1][j + 1] - z2;
+
+            float nx2 = ty2 * uz2 - tz2 * uy2;
+            float ny2 = tz2 * ux2 - tx2 * uz2;
+            float nz2 = tx2 * uy2 - ty2 * ux2;
+
+            float len2 = sqrtf(nx2*nx2 + ny2*ny2 + nz2*nz2);
+            if (len2 > 0.001f) { nx2 /= len2; ny2 /= len2; nz2 /= len2; }
+
+            float r2, g2, b2;
+            get_terrain_color(x2, y2, z2, &r2, &g2, &b2);
+            
+            float alpha2 = 1.0f;
+            if (z2 > 7.0f) alpha2 = 1.0f - smoothstep(7.0f, 9.5f, z2);
+
+            glColor4f(r2, g2, b2, alpha2);
+            glNormal3f(nx2, ny2, nz2);
             glTexCoord2f(x2 * 0.25f, y2 * 0.25f);
             glVertex3f(x2, y2, z2);
         }
         glEnd();
     }
-    
+
+    glDepthFunc(GL_LESS);
+    glDisable(GL_BLEND);
+
     glEndList(); 
     return list_id;
 }
