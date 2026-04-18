@@ -18,16 +18,15 @@ static void free_chunk(Chunk* chunk) {
 
     if (chunk->is_active) {
 
-        if (chunk->terrain_display_list != 0) {
-            glDeleteLists(chunk->terrain_display_list, 1);
-        }
+        if (chunk->terrain_display_list != 0) glDeleteLists(chunk->terrain_display_list, 1);
+        if (chunk->forest_display_list != 0) glDeleteLists(chunk->forest_display_list, 1); 
 
         chunk->is_active = false;
         chunk->terrain_display_list = 0;
     }
 }
 
-static void load_chunk(Chunk* chunk, int cx, int cy) {
+static void load_chunk(Scene* scene, Chunk* chunk, int cx, int cy) {
 
     chunk->cx = cx;
     chunk->cy = cy;
@@ -39,7 +38,8 @@ static void load_chunk(Chunk* chunk, int cx, int cy) {
     chunk->terrain_display_list = init_terrain_chunk(cx, cy);
 
     chunk->num_objects = 0;
-    init_forest_chunk(chunk);
+    init_forest_chunk(scene, chunk);
+ 
 }
 
 void init_scene(Scene* scene) {
@@ -60,6 +60,7 @@ void init_scene(Scene* scene) {
         "assets/models/Rock_3.obj",      "assets/models/Bush.obj",
         "assets/models/Bush.obj",        "assets/models/Bush.obj"
     };
+
     int num_files_to_load = sizeof(obj_files) / sizeof(obj_files[0]);
 
     for (int i = 0; i < num_files_to_load && i < MAX_MODELS; i++) {
@@ -130,7 +131,7 @@ void update_scene(Scene* scene, const Camera* camera, double time) {
 
                     if (!scene->active_chunks[i].is_active) {
 
-                        load_chunk(&scene->active_chunks[i], x, y);
+                        load_chunk(scene, &scene->active_chunks[i], x, y);
                         chunk_loaded_this_frame = true;
                         break;
                     }
@@ -155,7 +156,7 @@ void render_scene(const Scene* scene, const Camera* camera) {
 
             glCallList(scene->active_chunks[i].terrain_display_list);
             
-            render_forest_chunk(&scene->active_chunks[i], scene, camera);
+            render_forest_chunk(&scene->active_chunks[i]);
         }
     }
 

@@ -10,10 +10,10 @@ void init_forest(Scene* scene, const char* obj_files[]);
 
 // Populates a specific terrain chunk with randomly scaled and positioned trees, rocks, and bushes
 
-void init_forest_chunk(Chunk* chunk);
+void init_forest_chunk(Scene* scene, Chunk* chunk);
 
 // Renders the visible objects within a chunk, applying Level of Detail (LOD) and frustum culling
 
-void render_forest_chunk(const Chunk* chunk, const Scene* scene, const Camera* camera);
+void render_forest_chunk(const Chunk* chunk);
 
 #endif /* FOREST_H */

@@ -39,6 +39,7 @@ typedef struct Chunk {
     bool is_active;
     
     GLuint terrain_display_list; 
+    GLuint forest_display_list;
     
     SceneObject objects[MAX_CHUNK_OBJECTS]; 
     int num_objects;

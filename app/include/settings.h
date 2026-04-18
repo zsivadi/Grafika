@@ -9,9 +9,6 @@
 #define LAKE_RADIUS         22.0f
 #define LAKE_CENTER_X       18.0f
 #define LAKE_CENTER_Y       18.0f
-
-#define LOD_FULL_DIST  60.0f
-#define LOD_SKIP_DIST  120.0f
 #define MAX_MODELS 25
 
 /* --- PLAYER & CONTROLS --- */

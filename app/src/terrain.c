@@ -171,51 +171,81 @@ GLuint init_terrain_chunk(int cx, int cy) {
     glDisable(GL_ALPHA_TEST);
 
     float step = 2.0f; 
+
+    int grid_cells = (int)(CHUNK_SIZE / step);
+    int cache_size = grid_cells + 2;
     
     float start_x = cx * CHUNK_SIZE;
     float start_y = cy * CHUNK_SIZE;
 
-    float end_x = start_x + CHUNK_SIZE;
-    float end_y = start_y + CHUNK_SIZE;
+    float hmap[35][35];
 
-    for (float x = start_x; x < end_x; x += step) {
+    for (int i = 0; i < cache_size; i++) {
+        for (int j = 0; j < cache_size; j++) {
+            hmap[i][j] = get_terrain_height(start_x + i * step, start_y + j * step);
+        }
+    }
+
+    for (int i = 0; i < grid_cells; i++) {
 
         glBegin(GL_QUAD_STRIP);
 
-        for (float y = start_y; y <= end_y; y += step) {
+        for (int j = 0; j <= grid_cells; j++) {
 
-            float z1 = get_terrain_height(x, y);
+            float x1 = start_x + i * step;
+            float y1 = start_y + j * step;
+            float z1 = hmap[i][j]; 
 
-            float nx1, ny1, nz1;
-            get_terrain_normal(x, y, &nx1, &ny1, &nz1);
+            float h_right1 = hmap[i + 1][j];
+            float h_up1    = hmap[i][j + 1];
+            
+            float tx1 = step, ty1 = 0.0f, tz1 = h_right1 - z1;
+            float ux1 = 0.0f, uy1 = step, uz1 = h_up1 - z1;
+
+            float nx1 = ty1 * uz1 - tz1 * uy1;
+            float ny1 = tz1 * ux1 - tx1 * uz1;
+            float nz1 = tx1 * uy1 - ty1 * ux1;
+
+            float len1 = sqrtf(nx1*nx1 + ny1*ny1 + nz1*nz1);
+            if (len1 > 0.001f) { nx1 /= len1; ny1 /= len1; nz1 /= len1; }
 
             float r1, g1, b1;
-            get_terrain_color(x, y, z1, &r1, &g1, &b1);
+            get_terrain_color(x1, y1, z1, &r1, &g1, &b1);
             
             glColor3f(r1, g1, b1);
             glNormal3f(nx1, ny1, nz1);
-            glTexCoord2f(x * 0.25f, y * 0.25f);
-            glVertex3f(x, y, z1);
+            glTexCoord2f(x1 * 0.25f, y1 * 0.25f);
+            glVertex3f(x1, y1, z1);
             
-            float x2 = x + step;
-            float z2 = get_terrain_height(x2, y);
+            float x2 = start_x + (i + 1) * step;
+            float y2 = start_y + j * step;
+            float z2 = hmap[i + 1][j];
 
-            float nx2, ny2, nz2;
-            get_terrain_normal(x2, y, &nx2, &ny2, &nz2);
+            float h_right2 = hmap[i + 2][j];
+            float h_up2    = hmap[i + 1][j + 1];
+
+            float tx2 = step, ty2 = 0.0f, tz2 = h_right2 - z2;
+            float ux2 = 0.0f, uy2 = step, uz2 = h_up2 - z2;
+
+            float nx2 = ty2 * uz2 - tz2 * uy2;
+            float ny2 = tz2 * ux2 - tx2 * uz2;
+            float nz2 = tx2 * uy2 - ty2 * ux2;
+
+            float len2 = sqrtf(nx2*nx2 + ny2*ny2 + nz2*nz2);
+            if (len2 > 0.001f) { nx2 /= len2; ny2 /= len2; nz2 /= len2; }
 
             float r2, g2, b2;
-            get_terrain_color(x2, y, z2, &r2, &g2, &b2);
+            get_terrain_color(x2, y2, z2, &r2, &g2, &b2);
             
             glColor3f(r2, g2, b2);
             glNormal3f(nx2, ny2, nz2);
-            glTexCoord2f(x2 * 0.25f, y * 0.25f);
-            glVertex3f(x2, y, z2);
-        }
 
+            glTexCoord2f(x2 * 0.25f, y2 * 0.25f);
+            glVertex3f(x2, y2, z2);
+        }
         glEnd();
     }
     
     glEndList(); 
-    
     return list_id;
 }
