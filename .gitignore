@@ -7,3 +7,4 @@ sdl_utils.h
 *.obj
 *.mtl
 *.log
+*.zip

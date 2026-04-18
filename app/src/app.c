@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#define MAX_COLLISION_OBJECTS (MAX_ACTIVE_CHUNKS * MAX_CHUNK_OBJECTS + 4)
+
 void init_app(App* app, int width, int height) {
     
     int error_code;
@@ -47,6 +49,8 @@ void init_app(App* app, int width, int height) {
         printf("[ERROR] Unable to create the OpenGL context: %s\n", SDL_GetError());
         return;
     }
+
+    SDL_GL_SetSwapInterval(1);
 
     app->uptime = (double)SDL_GetTicks() / 1000.0;
 
@@ -188,7 +192,7 @@ static void update_sky(double uptime) {
     float moon_x =  cosf(moon_angle) * orbit;
     float moon_z =  sinf(moon_angle) * orbit;
 
-    float light_pos[] = { sun_x, 0.0f, sun_z, 1.0f };
+    float light_pos[] = { sun_x, 0.0f, sun_z, 0.0f };
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
     float sky_day[]     = { 0.529f, 0.808f, 0.922f };
@@ -419,38 +423,47 @@ void update_app(App* app) {
         elapsed_time = 0.0;
     }
 
-    vec3 positions[MAX_OBJECTS + 4];
-    float radii[MAX_OBJECTS + 4];
-    int count = app->scene.num_objects;
+    
 
-    for (int i = 0; i < count; i++) {
+    vec3 positions[MAX_COLLISION_OBJECTS];
+    float radii[MAX_COLLISION_OBJECTS];
+    int count = 0;
 
-        positions[i] = app->scene.objects[i].position;
-        radii[i]     = app->scene.objects[i].radius;
+    for (int c = 0; c < MAX_ACTIVE_CHUNKS; c++) {
+
+        if (app->scene.active_chunks[c].is_active) {
+
+            for (int i = 0; i < app->scene.active_chunks[c].num_objects; i++) {
+
+                positions[count] = app->scene.active_chunks[c].objects[i].position;
+                radii[count]     = app->scene.active_chunks[c].objects[i].radius;
+
+                count++;
+            }
+        }
     }
 
     // The hitboxes of the tents and the campfire
 
-    int extra = 0;
-    positions[count + extra].x = CAMPFIRE_X;
-    positions[count + extra].y = CAMPFIRE_Y;
-    positions[count + extra].z = 0.0f;
-
-    radii[count + extra] = app->scene.campfire_radius;
-    extra++;
+    positions[count].x = CAMPFIRE_X;
+    positions[count].y = CAMPFIRE_Y;
+    positions[count].z = 0.0f;
+    radii[count] = app->scene.campfire_radius;
+    count++;
 
     for (int i = 0; i < 3; i++) {
 
-        positions[count + extra] = app->scene.tent_positions[i];
-        radii[count + extra]     = app->scene.tent_radius;
-        extra++;
+        positions[count] = app->scene.tent_positions[i];
+        radii[count]     = app->scene.tent_radius;
+
+        count++;
     }
 
     update_camera(&(app->camera), elapsed_time,
-                  positions, radii, count + extra,
-                  LAKE_CENTER_X, LAKE_CENTER_Y, 15.0f);
+                  positions, radii, count,
+                  LAKE_CENTER_X, LAKE_CENTER_Y, LAKE_RADIUS - 4);
 
-    update_scene(&(app->scene), elapsed_time);
+    update_scene(&(app->scene), &(app->camera), elapsed_time);
 }
 
 void render_app(App* app) {

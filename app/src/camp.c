@@ -1,4 +1,5 @@
 #include "camp.h"
+#include "terrain.h"
 
 #include <GL/gl.h>
 
@@ -17,7 +18,7 @@ void init_camp(Scene* scene) {
 
         scene->tent_positions[i].x = CAMPFIRE_X + cosf(a) * tent_dist;
         scene->tent_positions[i].y = CAMPFIRE_Y + sinf(a) * tent_dist;
-        scene->tent_positions[i].z = 0.0f;
+        scene->tent_positions[i].z = get_terrain_height(scene->tent_positions[i].x, scene->tent_positions[i].y);
     }
 }
 

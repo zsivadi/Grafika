@@ -8,7 +8,7 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 
-#define VIEWPORT_RATIO (4.0 / 3.0)
+// Length of the day
 
 #define DAY_DURATION 120.0
 

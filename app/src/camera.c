@@ -1,10 +1,11 @@
 #include "camera.h"
+#include "terrain.h"
 
 #include <GL/gl.h>
 #include <math.h>
 
 void init_camera(Camera* camera) {
-    
+
     camera->position.x = 0.0;
     camera->position.y = 0.0;
     camera->position.z = 1.5;
@@ -26,26 +27,29 @@ void update_camera(Camera* camera, double time, const vec3* obstacles, const flo
     double angle;
     double side_angle;
 
-    angle      = degree_to_radian(camera->rotation.z);
+    angle = degree_to_radian(camera->rotation.z);
     side_angle = degree_to_radian(camera->rotation.z + 90.0);
 
     float new_x = camera->position.x;
     float new_y = camera->position.y;
 
-    new_x += (float)(cos(angle)      * camera->speed.y * time);
-    new_y += (float)(sin(angle)      * camera->speed.y * time);
+    new_x += (float)(cos(angle) * camera->speed.y * time);
+    new_y += (float)(sin(angle) * camera->speed.y * time);
     new_x += (float)(cos(side_angle) * camera->speed.x * time);
     new_y += (float)(sin(side_angle) * camera->speed.x * time);
 
     float player_radius = 0.5f;
     int blocked = 0;
 
+    // Check collision with obstacles (trees, rocks, etc.)
+    
     for (int i = 0; i < obstacle_count; i++) {
- 
+
         float dx = new_x - obstacles[i].x;
         float dy = new_y - obstacles[i].y;
-        float dist = sqrtf(dx*dx + dy*dy);
- 
+
+        float dist = sqrtf(dx * dx + dy * dy);
+
         if (dist < player_radius + radii[i]) {
 
             blocked = 1;
@@ -53,27 +57,48 @@ void update_camera(Camera* camera, double time, const vec3* obstacles, const flo
         }
     }
 
+    // Check collision with lake boundary
+
     if (!blocked) {
- 
+
         float dx = new_x - lake_x;
         float dy = new_y - lake_y;
-        float dist = sqrtf(dx*dx + dy*dy);
- 
+
+        float dist = sqrtf(dx * dx + dy * dy);
+
         if (dist < player_radius + lake_radius) {
             blocked = 1;
         }
     }
- 
+
+    // Update position if not blocked
+
     if (!blocked) {
-        
+
         camera->position.x = new_x;
         camera->position.y = new_y;
     }
- 
+
+    // Get terrain height at camera position
+
+    float terrain_height = get_terrain_height(camera->position.x, camera->position.y);
+    
+    // Camera eye height above ground
+
+    float eye_height = 1.5f;
+    
+    // Smoothly adjust camera height to follow terrain
+
+    float target_z = terrain_height + eye_height;
+
+    float height_lerp_factor = 10.0f * time; 
+    if (height_lerp_factor > 1.0f) height_lerp_factor = 1.0f;
+    
+    camera->position.z += (target_z - camera->position.z) * height_lerp_factor;
+
     if (camera->speed.x != 0 || camera->speed.y != 0) {
         camera->bobbing_timer += time * 8.0;
-    } 
-
+    }
 }
 
 void set_view(const Camera* camera) {
@@ -91,7 +116,7 @@ void set_view(const Camera* camera) {
 }
 
 void rotate_camera(Camera* camera, double horizontal, double vertical) {
-
+    
     camera->rotation.z += horizontal;
     camera->rotation.x += vertical;
 

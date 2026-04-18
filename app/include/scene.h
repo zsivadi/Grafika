@@ -4,31 +4,41 @@
 #include "model.h"
 #include "camera.h"
 
-// Maximum number of scene objects and model types
+// Terrain and rendering parameters
 
-#define MAX_OBJECTS 750
+#define CHUNK_SIZE 60.0f
+#define RENDER_DISTANCE 1 
+#define MAX_ACTIVE_CHUNKS ((RENDER_DISTANCE * 2 + 1) * (RENDER_DISTANCE * 2 + 1))
+#define MAX_CHUNK_OBJECTS 150 
+
+// Global limits
+
 #define MAX_MODELS 25
 
-// Lake position and size parameters
+// Lake geometry boundaries
 
 #define LAKE_CENTER_X 18.0f
 #define LAKE_CENTER_Y 18.0f
 #define LAKE_RADIUS   22.0f
 
-// Level of Detail distance thresholds
+// Level of Detail (LOD) distances
 
 #define LOD_FULL_DIST  60.0f
 #define LOD_SKIP_DIST  120.0f
 
-// Campfire position in world space
+// Campfire coordinates
 
 #define CAMPFIRE_X  -8.0f
 #define CAMPFIRE_Y  -8.0f
+
+// Structure representing a moving duck
 
 typedef struct Duck {
     float x, y;
     float dir_x, dir_y;
 } Duck;
+
+// Structure for static environment objects 
 
 typedef struct SceneObject {
     vec3 position;
@@ -37,13 +47,28 @@ typedef struct SceneObject {
     int model_index; 
 } SceneObject;
 
+// Structure representing a dynamically loaded segment of the world
+
+typedef struct Chunk {
+    int cx; 
+    int cy; 
+    bool is_active;
+    
+    GLuint terrain_display_list; 
+    
+    SceneObject objects[MAX_CHUNK_OBJECTS]; 
+    int num_objects;
+} Chunk;
+
+// Main scene container holding the world state, models, and entities
+
 typedef struct Scene {
     double uptime;
 
-    SceneObject objects[MAX_OBJECTS]; 
+    Chunk active_chunks[MAX_ACTIVE_CHUNKS]; 
+    
     Model models[MAX_MODELS];
     int num_loaded_models;    
-    int num_objects;
 
     Model campfire_model;
     Model tent_model;
@@ -58,20 +83,19 @@ typedef struct Scene {
     float fire_brightness;
 } Scene;
 
-// Initialize the scene with all objects, models, and game state
+// Initializes the core scene components, models, and static entities
 
 void init_scene(Scene* scene);
 
-// Update scene state including animations, duck movement, and time progression
+// Updates dynamic elements (ducks, time) and manages chunk loading/unloading
 
-void update_scene(Scene* scene, double time);
+void update_scene(Scene* scene, const Camera* camera, double time); 
 
-// Render all scene geometry including terrain, objects, water, fire effects
+// Renders all active chunks, entities, effects, and the lake
 
 void render_scene(const Scene* scene, const Camera* camera);
 
-// Handle player interactions with campfire (toggle) and tents (sleep/skip time)
-// Returns: 0 = no interaction, 1 = campfire toggled, 2 = slept in tent
+// Handles player interactions (e.g., toggling fire, sleeping in tents)
 
 int scene_interact(Scene* scene, const Camera* camera, double* uptime);
 

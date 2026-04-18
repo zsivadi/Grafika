@@ -4,8 +4,16 @@
 #include "scene.h"
 #include "camera.h"
 
+// Initializes the global forest parameters and loads necessary model assets
+
 void init_forest(Scene* scene, const char* obj_files[]);
 
-void render_forest(const Scene* scene, const Camera* camera);
+// Populates a specific terrain chunk with randomly scaled and positioned trees, rocks, and bushes
+
+void init_forest_chunk(Chunk* chunk);
+
+// Renders the visible objects within a chunk, applying Level of Detail (LOD) and frustum culling
+
+void render_forest_chunk(const Chunk* chunk, const Scene* scene, const Camera* camera);
 
 #endif /* FOREST_H */

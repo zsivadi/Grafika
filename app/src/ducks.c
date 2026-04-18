@@ -81,7 +81,7 @@ void render_ducks(const Scene* scene) {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_LIGHTING);
 
-    float waterLevel = -0.5f;
+    float waterLevel = -1.35f;
 
     for (int d = 0; d < 2; d++) {
 
