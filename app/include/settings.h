@@ -11,7 +11,7 @@
 #define MAX_MODELS 25
 
 /* --- PLAYER & CONTROLS --- */
-#define PLAYER_WALK_SPEED   5.0f
+#define PLAYER_WALK_SPEED   20.0f
 #define PLAYER_EYE_HEIGHT   1.5f
 #define PLAYER_HITBOX_RAD   0.5f
 #define MOUSE_SENSITIVITY   0.1f

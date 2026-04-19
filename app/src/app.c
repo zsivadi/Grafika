@@ -181,7 +181,7 @@ static void draw_celestial_body(float x, float y, float z, float r, float g, flo
 
 // Updating the color of the sky to match the time of day
 
-static void update_sky(double uptime) {
+static void update_sky(double uptime, float player_x, float player_y, float player_z) {
 
     double day_phase = fmod(uptime, DAY_DURATION) / DAY_DURATION;
 
@@ -190,10 +190,10 @@ static void update_sky(double uptime) {
 
     float orbit = 180.0f;
 
-    float sun_x  =  cosf(sun_angle)  * orbit;
-    float sun_z  =  sinf(sun_angle)  * orbit;
-    float moon_x =  cosf(moon_angle) * orbit;
-    float moon_z =  sinf(moon_angle) * orbit;
+    float sun_x  =  player_x + cosf(sun_angle)  * orbit;
+    float sun_z  =  player_z + sinf(sun_angle)  * orbit;
+    float moon_x =  player_x + cosf(moon_angle) * orbit;
+    float moon_z =  player_z + sinf(moon_angle) * orbit;
 
     float light_pos[] = { sun_x, 0.0f, sun_z, 0.0f };
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
@@ -285,14 +285,14 @@ static void update_sky(double uptime) {
     glLightfv(GL_LIGHT0, GL_SPECULAR, diffuse);
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
 
-    if (sun_z > -20.0f) {
+    if (sun_z > (player_z - 20.0f)) {
 
         float sr = diffuse[0] * 1.5f > 1.0f ? 1.0f : diffuse[0] * 1.5f;
-        draw_celestial_body(sun_x, 0.0f, sun_z, sr, diffuse[1], diffuse[2] * 0.3f, 8.0f);
+        draw_celestial_body(sun_x, player_y, sun_z, sr, diffuse[1], diffuse[2] * 0.3f, 8.0f);
     }
 
-    if (moon_z > -20.0f) {
-        draw_celestial_body(moon_x, 0.0f, moon_z, 0.85f, 0.88f, 0.95f, 5.0f);
+    if (moon_z > (player_z - 20.0f)) {
+        draw_celestial_body(moon_x, player_y, moon_z, 0.85f, 0.88f, 0.95f, 5.0f);
     }
 }
 
@@ -476,7 +476,7 @@ void render_app(App* app) {
 
     glPushMatrix();
         set_view(&(app->camera));
-        update_sky(app->scene.uptime);
+        update_sky(app->scene.uptime, app->camera.position.x, app->camera.position.y, app->camera.position.z);
         render_scene(&(app->scene), &(app->camera));
     glPopMatrix();
 
