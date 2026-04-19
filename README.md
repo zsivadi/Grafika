@@ -1,7 +1,7 @@
 Camping Project
 
 A projekt egy interaktív 3D grafikus alkalmazás, amely egy procedurálisan generált erdei környezetet jelenít meg.
-A jelenet egy tisztást, tavat, amelyben kacsák úszkálnak, valamint egy tábort tartalmaz sátrkalla és tábortűzzel.
+A jelenet egy tisztást, tavat, amelyben kacsák úszkálnak, valamint egy tábort tartalmaz sátrakkal és tábortűzzel.
 A felhasználó szabadon bejárhatja a teret, interakcióba léphet az objektumokkal és különböző vizuális effekteket figyelhet meg.
 
 Funkciók:
@@ -38,6 +38,7 @@ Felhasznált modellek:
 
 
 A projekt futtatásának lépései:
+
 A letöltött assets.zip fájlt csomagolja ki az app mappán belül az include és az src mappák mellé. 
 Ezt követően egy terminálból navigáljon a az app mappába és adjon ki egy 'make' utasítást, majd futtassa a projektet a
 'camping_project.exe' parancs kiadásával.

@@ -1,3 +1,5 @@
+#include "settings.h"
+
 #include "terrain.h"
 
 #include <GL/gl.h>
@@ -15,7 +17,9 @@ float smoothstep(float edge0, float edge1, float x) {
 
 static float hash(float x, float y) {
 
-    float n = sin(x * 12.9898f + y * 78.233f) * 43758.5453f;
+    float seed_offset = (float)(WORLD_SEED % 100000) * 0.1337f;
+
+    float n = sin((x + seed_offset) * 12.9898f + (y + seed_offset) * 78.233f) * 43758.5453f;
     return n - floor(n);
 }
 

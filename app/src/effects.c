@@ -1,3 +1,5 @@
+#include "settings.h"
+
 #include "effects.h"
 
 #include <GL/gl.h>
@@ -137,7 +139,7 @@ void render_clouds(double uptime, float cam_x, float cam_y, GLuint cloud_texture
             int cx = start_cx + x;
             int cy = start_cy + y;
 
-            unsigned int seed = (unsigned int)(cx * 73856093 ^ cy * 19349663);
+            unsigned int seed = (unsigned int)(WORLD_SEED ^ (cx * 73856093) ^ (cy * 19349663));
             
             #define RND() (seed = (seed * 1103515245 + 12345) & 0x7fffffff, (float)seed / 0x7fffffff)
 

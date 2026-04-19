@@ -35,7 +35,7 @@ static void load_chunk(Scene* scene, Chunk* chunk, int cx, int cy) {
     chunk->cy = cy;
     chunk->is_active = true;
 
-    unsigned int seed = (unsigned int)(cx * 73856093 ^ cy * 19349663);
+    unsigned int seed = (unsigned int)(WORLD_SEED ^ (cx * 73856093) ^ (cy * 19349663));
     srand(seed);
 
     chunk->terrain_display_list = init_terrain_chunk(cx, cy);

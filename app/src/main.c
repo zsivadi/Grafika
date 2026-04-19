@@ -1,3 +1,5 @@
+#include "settings.h"
+
 #include "app.h"
 
 #include <stdio.h>
@@ -9,7 +11,7 @@ int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    srand(time(NULL));
+    srand(WORLD_SEED);
     
     App app;
 

@@ -2,6 +2,8 @@
 #define SETTINGS_H
 
 /* --- WORLD & PERFORMANCE --- */
+#define WORLD_SEED          45000
+
 #define CHUNK_SIZE          60.0f
 #define RENDER_DISTANCE     1
 #define MAX_CHUNK_OBJECTS   150
