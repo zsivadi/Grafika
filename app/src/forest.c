@@ -1,6 +1,7 @@
 #include "forest.h"
 #include "terrain.h"
 #include "lake.h"
+#include "effects.h"
 
 #include <GL/gl.h>
 #include <math.h>
@@ -66,7 +67,37 @@ void init_forest_chunk(Scene* scene, Chunk* chunk) {
 
         glPopMatrix();
     }
-    
+
+    glEndList();
+
+
+    chunk->grass_display_list = glGenLists(1);
+    glNewList(chunk->grass_display_list, GL_COMPILE);
+
+    for (int j = 0; j < 400; j++) {
+        
+        float local_x = ((float)rand() / (float)RAND_MAX) * CHUNK_SIZE;
+        float local_y = ((float)rand() / (float)RAND_MAX) * CHUNK_SIZE;
+        
+        float global_x = start_x + local_x;
+        float global_y = start_y + local_y;
+        
+        float rz = get_terrain_height(global_x, global_y);
+        
+        
+        if (rz < 8.0f) {
+
+            float dist_lake = sqrtf(powf(global_x - LAKE_CENTER_X, 2) + powf(global_y - LAKE_CENTER_Y, 2));
+            float dist_campfire = sqrtf(powf(global_x - CAMPFIRE_X, 2) + powf(global_y - CAMPFIRE_Y, 2));
+            
+            if (dist_lake > LAKE_RADIUS + 1.0f && dist_campfire > 8.0f) {
+
+                float scale = 1.0f + ((float)rand() / (float)RAND_MAX) * 0.5f;
+                draw_grass_patch(local_x, local_y, rz, scale);
+            }
+        }
+    }
+
     glEndList();
 }
 

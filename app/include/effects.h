@@ -13,4 +13,6 @@ void draw_smoke(double uptime, float cam_x, float cam_y, float fire_x, float fir
 
 void render_clouds(double uptime, float cam_x, float cam_y, GLuint cloud_texture);
 
+void draw_grass_patch(float x, float y, float z, float scale);
+
 #endif /* EFFECTS_H */

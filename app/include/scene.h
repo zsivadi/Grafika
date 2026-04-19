@@ -40,6 +40,7 @@ typedef struct Chunk {
     
     GLuint terrain_display_list; 
     GLuint forest_display_list;
+    GLuint grass_display_list;
     
     SceneObject objects[MAX_CHUNK_OBJECTS]; 
     int num_objects;
@@ -69,6 +70,7 @@ typedef struct Scene {
 
     GLuint grass_texture;
     GLuint clouds_texture;
+    GLuint grass_patch_texture;
 } Scene;
 
 // Initializes the core scene components, models, and static entities

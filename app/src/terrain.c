@@ -144,6 +144,25 @@ static void get_terrain_color(float x, float y, float height, float* r, float* g
     }
 }
 
+static void apply_rock_material_and_bump(float x, float y, float z, float* nx, float* ny, float* nz) {
+    
+    float rb = smoothstep(4.5f, 6.5f, z);
+
+    float spec_val = rb * 0.4f; 
+    float spec_color[] = {spec_val, spec_val, spec_val, 1.0f};
+    glMaterialfv(GL_FRONT, GL_SPECULAR, spec_color);
+    glMaterialf(GL_FRONT, GL_SHININESS, 8.0f + rb * 56.0f); 
+
+    if (rb > 0.0f) {
+        float rough = (hash(x * 7.0f, y * 7.0f) - 0.5f) * 0.6f * rb;
+        *nx += rough; 
+        *ny += rough;
+        
+        float l = sqrtf((*nx)*(*nx) + (*ny)*(*ny) + (*nz)*(*nz));
+        if (l > 0.001f) { *nx /= l; *ny /= l; *nz /= l; }
+    }
+}
+
 GLuint init_terrain_chunk(int cx, int cy) {
 
     GLuint list_id = glGenLists(1);
@@ -189,6 +208,7 @@ GLuint init_terrain_chunk(int cx, int cy) {
 
             float r1, g1, b1;
             get_terrain_color(x1, y1, z1, &r1, &g1, &b1);
+            apply_rock_material_and_bump(x1, y1, z1, &nx1, &ny1, &nz1);
             
             glColor3f(r1, g1, b1);
             glNormal3f(nx1, ny1, nz1);
@@ -210,6 +230,7 @@ GLuint init_terrain_chunk(int cx, int cy) {
 
             float r2, g2, b2;
             get_terrain_color(x2, y2, z2, &r2, &g2, &b2);
+            apply_rock_material_and_bump(x2, y2, z2, &nx2, &ny2, &nz2);
             
             glColor3f(r2, g2, b2);
             glNormal3f(nx2, ny2, nz2);

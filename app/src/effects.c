@@ -185,3 +185,25 @@ void render_clouds(double uptime, float cam_x, float cam_y, GLuint cloud_texture
     glDisable(GL_BLEND);
     glEnable(GL_LIGHTING);
 }
+
+void draw_grass_patch(float x, float y, float z, float scale) {
+
+    float w = 0.8f * scale; 
+    float h = 0.5f * scale; 
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    glBegin(GL_QUADS);
+
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(x - w, y, z);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(x + w, y, z);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(x + w, y, z + h);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(x - w, y, z + h);
+
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(x, y - w, z);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(x, y + w, z);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(x, y + w, z + h);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(x, y - w, z + h);
+
+    glEnd();
+}

@@ -20,9 +20,12 @@ static void free_chunk(Chunk* chunk) {
 
         if (chunk->terrain_display_list != 0) glDeleteLists(chunk->terrain_display_list, 1);
         if (chunk->forest_display_list != 0) glDeleteLists(chunk->forest_display_list, 1); 
+        if (chunk->grass_display_list != 0) glDeleteLists(chunk->grass_display_list, 1);
 
         chunk->is_active = false;
         chunk->terrain_display_list = 0;
+        chunk->forest_display_list = 0;
+        chunk->grass_display_list = 0;
     }
 }
 
@@ -57,8 +60,7 @@ void init_scene(Scene* scene) {
         "assets/models/BirchTree_5.obj", "assets/models/BirchTree_5.obj",
         "assets/models/DeadTree_1.obj",  "assets/models/DeadTree_2.obj",
         "assets/models/Rock_1.obj",      "assets/models/Rock_2.obj",
-        "assets/models/Rock_3.obj",      "assets/models/Bush.obj",
-        "assets/models/Bush.obj",        "assets/models/Bush.obj"
+        "assets/models/Rock_3.obj"
     };
 
     int num_files_to_load = sizeof(obj_files) / sizeof(obj_files[0]);
@@ -86,6 +88,7 @@ void init_scene(Scene* scene) {
 
     scene->grass_texture = load_texture("assets/textures/grass_texture.jpg");
     scene->clouds_texture = load_texture("assets/textures/clouds.jpg");
+    scene->grass_patch_texture = load_texture("assets/textures/grass_patch.png");
 }
 
 void update_scene(Scene* scene, const Camera* camera, double time) {
@@ -148,6 +151,9 @@ void update_scene(Scene* scene, const Camera* camera, double time) {
 
 void render_scene(const Scene* scene, const Camera* camera) {
 
+    int player_cx = (int)floor(camera->position.x / CHUNK_SIZE);
+    int player_cy = (int)floor(camera->position.y / CHUNK_SIZE);
+
     for (int i = 0; i < MAX_ACTIVE_CHUNKS; i++) {
 
         if (scene->active_chunks[i].is_active) {
@@ -158,6 +164,32 @@ void render_scene(const Scene* scene, const Camera* camera) {
             glCallList(scene->active_chunks[i].terrain_display_list);
             
             render_forest_chunk(&scene->active_chunks[i]);
+
+            int dx = abs(scene->active_chunks[i].cx - player_cx);
+            int dy = abs(scene->active_chunks[i].cy - player_cy);
+
+            if (dx <= 1 && dy <= 1) { 
+
+                glDisable(GL_LIGHTING);
+                glDisable(GL_BLEND); 
+
+                glEnable(GL_ALPHA_TEST);
+                glAlphaFunc(GL_GREATER, 0.5f);
+
+                glBindTexture(GL_TEXTURE_2D, scene->grass_patch_texture);
+                
+                glPushMatrix();
+                
+                glTranslatef(scene->active_chunks[i].cx * CHUNK_SIZE, 
+                             scene->active_chunks[i].cy * CHUNK_SIZE, 0.0f);
+                
+                glCallList(scene->active_chunks[i].grass_display_list);
+
+                glPopMatrix();
+
+                glDisable(GL_ALPHA_TEST);
+                glEnable(GL_LIGHTING);
+            }
         }
     }
 
