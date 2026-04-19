@@ -60,7 +60,8 @@ void init_scene(Scene* scene) {
         "assets/models/BirchTree_5.obj", "assets/models/BirchTree_5.obj",
         "assets/models/DeadTree_1.obj",  "assets/models/DeadTree_2.obj",
         "assets/models/Rock_1.obj",      "assets/models/Rock_2.obj",
-        "assets/models/Rock_3.obj"
+        "assets/models/Rock_3.obj",      "assets/models/Bush.obj",
+        "assets/models/Bush.obj",        "assets/models/Bush.obj"
     };
 
     int num_files_to_load = sizeof(obj_files) / sizeof(obj_files[0]);
@@ -170,7 +171,6 @@ void render_scene(const Scene* scene, const Camera* camera) {
 
             if (dx <= 1 && dy <= 1) { 
 
-                glDisable(GL_LIGHTING);
                 glDisable(GL_BLEND); 
 
                 glEnable(GL_ALPHA_TEST);
@@ -188,7 +188,6 @@ void render_scene(const Scene* scene, const Camera* camera) {
                 glPopMatrix();
 
                 glDisable(GL_ALPHA_TEST);
-                glEnable(GL_LIGHTING);
             }
         }
     }

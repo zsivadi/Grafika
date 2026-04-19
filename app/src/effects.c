@@ -206,4 +206,5 @@ void draw_grass_patch(float x, float y, float z, float scale) {
         glTexCoord2f(0.0f, 0.0f); glVertex3f(x, y - w, z + h);
 
     glEnd();
+    
 }

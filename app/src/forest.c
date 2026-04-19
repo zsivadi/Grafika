@@ -36,12 +36,12 @@ void init_forest_chunk(Scene* scene, Chunk* chunk) {
 
         chunk->objects[i].position.x = rx;
         chunk->objects[i].position.y = ry;
-        chunk->objects[i].position.z = rz - 0.3f; 
+        chunk->objects[i].position.z = rz - 0.15f; 
 
         chunk->objects[i].scale = 1.0f + ((float)rand() / RAND_MAX) * 0.8f;
         chunk->objects[i].model_index = rand() % 16; 
 
-        chunk->objects[i].radius = 0.3f * chunk->objects[i].scale;
+        chunk->objects[i].radius = 0.2f * chunk->objects[i].scale;
         
         chunk->num_objects++;
     }
