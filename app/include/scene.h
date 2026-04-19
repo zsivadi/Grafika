@@ -68,6 +68,7 @@ typedef struct Scene {
     float fire_brightness;
 
     GLuint grass_texture;
+    GLuint clouds_texture;
 } Scene;
 
 // Initializes the core scene components, models, and static entities

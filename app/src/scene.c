@@ -85,6 +85,7 @@ void init_scene(Scene* scene) {
     init_ducks(scene->ducks);
 
     scene->grass_texture = load_texture("assets/textures/grass_texture.jpg");
+    scene->clouds_texture = load_texture("assets/textures/clouds.jpg");
 }
 
 void update_scene(Scene* scene, const Camera* camera, double time) {
@@ -163,6 +164,10 @@ void render_scene(const Scene* scene, const Camera* camera) {
     render_camp(scene);
     render_ducks(scene);
     render_lake(scene->uptime);
+
+    if (scene->clouds_texture != 0) {
+        render_clouds(scene->uptime, camera->position.x, camera->position.y, scene->clouds_texture);
+    }
 
     if (scene->fire_lit) {
 

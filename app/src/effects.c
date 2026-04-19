@@ -107,3 +107,81 @@ void draw_smoke(double uptime, float cam_x, float cam_y, float fire_x, float fir
     glEnable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
 }
+
+void render_clouds(double uptime, float cam_x, float cam_y, GLuint cloud_texture) {
+
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, cloud_texture);
+    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
+    glDepthMask(GL_FALSE); 
+
+    float base_height = 60.0f; 
+    float cell_size = 30.0f;  
+    int grid_radius = 6;       
+    float scroll_speed = 1.5f; 
+
+    float virtual_x = cam_x - (float)uptime * scroll_speed;
+    float virtual_y = cam_y; 
+
+    int start_cx = (int)floorf(virtual_x / cell_size) - grid_radius;
+    int start_cy = (int)floorf(virtual_y / cell_size) - grid_radius;
+
+    glBegin(GL_QUADS);
+
+    for (int x = 0; x < grid_radius * 2; x++) {
+        for (int y = 0; y < grid_radius * 2; y++) {
+            
+            int cx = start_cx + x;
+            int cy = start_cy + y;
+
+            unsigned int seed = (unsigned int)(cx * 73856093 ^ cy * 19349663);
+            
+            #define RND() (seed = (seed * 1103515245 + 12345) & 0x7fffffff, (float)seed / 0x7fffffff)
+
+            int num_clouds = (int)(RND() * 3.99f); 
+
+            for (int i = 0; i < num_clouds; i++) {
+                
+                float offset_x = RND() * cell_size;
+                float offset_y = RND() * cell_size;
+                
+                float scale_x = 15.0f + RND() * 25.0f; 
+                float scale_y = 15.0f + RND() * 25.0f; 
+                
+                float height = base_height + RND() * 8.0f;
+
+                float base_alpha = 0.2f + RND() * 0.6f;
+
+                float wx = cx * cell_size + offset_x + (float)uptime * scroll_speed;
+                float wy = cy * cell_size + offset_y;
+
+                float dx = wx - cam_x;
+                float dy = wy - cam_y;
+                float dist = sqrtf(dx*dx + dy*dy);
+                float max_dist = grid_radius * cell_size;
+
+                if (dist > max_dist) continue; 
+
+                float fade = 1.0f - (dist / max_dist);
+                fade = fade * fade; 
+
+                glColor4f(1.0f, 1.0f, 1.0f, base_alpha * fade);
+
+                glTexCoord2f(0.0f, 0.0f); glVertex3f(wx - scale_x, wy - scale_y, height);
+                glTexCoord2f(1.0f, 0.0f); glVertex3f(wx + scale_x, wy - scale_y, height);
+                glTexCoord2f(1.0f, 1.0f); glVertex3f(wx + scale_x, wy + scale_y, height);
+                glTexCoord2f(0.0f, 1.0f); glVertex3f(wx - scale_x, wy + scale_y, height);
+            }
+        }
+    }
+    glEnd();
+
+    #undef RND
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+}
