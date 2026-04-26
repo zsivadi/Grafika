@@ -150,14 +150,26 @@ void update_scene(Scene* scene, const Camera* camera, double time) {
     }
 }
 
-void render_scene(const Scene* scene, const Camera* camera) {
+void render_scene(const Scene* scene, const Camera* camera, float fly_offset) {
 
     int player_cx = (int)floor(camera->position.x / CHUNK_SIZE);
     int player_cy = (int)floor(camera->position.y / CHUNK_SIZE);
 
+    int camp_cx = (int)floor(CAMPFIRE_X / CHUNK_SIZE);
+    int camp_cy = (int)floor(CAMPFIRE_Y / CHUNK_SIZE);
+
+    int lake_cx = (int)floor(LAKE_CENTER_X / CHUNK_SIZE);
+    int lake_cy = (int)floor(LAKE_CENTER_Y / CHUNK_SIZE);
+
+    bool is_camp_active = false;
+    bool is_lake_active = false;
+
     for (int i = 0; i < MAX_ACTIVE_CHUNKS; i++) {
 
         if (scene->active_chunks[i].is_active) {
+
+            if (scene->active_chunks[i].cx == camp_cx && scene->active_chunks[i].cy == camp_cy) is_camp_active = true;
+            if (scene->active_chunks[i].cx == lake_cx && scene->active_chunks[i].cy == lake_cy) is_lake_active = true;
 
             glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, scene->grass_texture);
@@ -192,24 +204,30 @@ void render_scene(const Scene* scene, const Camera* camera) {
         }
     }
 
-    render_camp(scene);
-    render_ducks(scene);
-    render_lake(scene->uptime);
+    if (is_camp_active) {
+        render_camp(scene);
+        
+        if (scene->fire_lit) {
 
-    if (scene->clouds_texture != 0) {
-        render_clouds(scene->uptime, camera->position.x, camera->position.y, scene->clouds_texture);
+            glPushMatrix();
+
+            float fire_z = get_terrain_height(CAMPFIRE_X, CAMPFIRE_Y);
+            glTranslatef(CAMPFIRE_X, CAMPFIRE_Y, fire_z + 0.1f);
+            
+            draw_fire(scene->uptime, camera->position.x, camera->position.y, CAMPFIRE_X, CAMPFIRE_Y);
+            draw_smoke(scene->uptime, camera->position.x, camera->position.y, CAMPFIRE_X, CAMPFIRE_Y);
+            
+            glPopMatrix();
+        }
     }
 
-    if (scene->fire_lit) {
-
-        glPushMatrix();
-
-        float fire_z = get_terrain_height(CAMPFIRE_X, CAMPFIRE_Y);
-        glTranslatef(CAMPFIRE_X, CAMPFIRE_Y, fire_z + 0.1f);
+    if (is_lake_active) {
         
-        draw_fire(scene->uptime, camera->position.x, camera->position.y, CAMPFIRE_X, CAMPFIRE_Y);
-        draw_smoke(scene->uptime, camera->position.x, camera->position.y, CAMPFIRE_X, CAMPFIRE_Y);
+        render_ducks(scene);
+        render_lake(scene->uptime);
+    }
 
-        glPopMatrix();
+    if (scene->clouds_texture != 0) {
+        render_clouds(scene->uptime, camera->position.x, camera->position.y, scene->clouds_texture, fly_offset);
     }
 }

@@ -22,7 +22,7 @@ void init_camera(Camera* camera);
 
 // Update camera position based on time, collision detection with obstacles and lake boundaries
 
-void update_camera(Camera* camera, double time, const vec3* obstacles, const float* radii, int obstacle_count, float lake_x, float lake_y, float lake_radius);
+void update_camera(Camera* camera, double time, const vec3* obstacles, const float* radii, int obstacle_count, float lake_x, float lake_y, float lake_radius, float fly_offset);
 
 // Apply camera transformation to the OpenGL view matrix
 

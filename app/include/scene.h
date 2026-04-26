@@ -83,7 +83,7 @@ void update_scene(Scene* scene, const Camera* camera, double time);
 
 // Renders all active chunks, entities, effects, and the lake
 
-void render_scene(const Scene* scene, const Camera* camera);
+void render_scene(const Scene* scene, const Camera* camera, float fly_offset);
 
 // Handles player interactions (e.g., toggling fire, sleeping in tents)
 

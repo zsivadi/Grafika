@@ -357,6 +357,8 @@ void handle_app_events(App* app) {
                     app->dragging_slider = 2;
                 } else if (my >= 235 && my <= 265 && mx >= 320 && mx <= 780) {
                     app->dragging_slider = 3;
+                } else if (my >= 295 && my <= 325 && mx >= 320 && mx <= 780) {
+                    app->dragging_slider = 4;
                 }
 
                 // Pause checkbox (y: 80-100, x: 20-40)
@@ -393,9 +395,12 @@ void handle_app_events(App* app) {
                 } else if (app->dragging_slider == 3) {
                     app->fog_density = t * 0.05f;
                     glFogf(GL_FOG_DENSITY, app->fog_density);
+                } else if (app->dragging_slider == 4) {
+                    app->fly_slider = t;
                 }
             } else if (!app->menu_open) {
                 rotate_camera(&(app->camera), -event.motion.xrel * MOUSE_SENSITIVITY, -event.motion.yrel * MOUSE_SENSITIVITY);
+                //rotate_camera(&(app->camera), -event.motion.xrel * MOUSE_SENSITIVITY, 0);
             }
             break;
         case SDL_QUIT:
@@ -411,6 +416,7 @@ void update_app(App* app) {
     
     double current_time;
     double elapsed_time;
+
 
     current_time = (double)SDL_GetTicks() / 1000.0;
     elapsed_time = current_time - app->uptime;
@@ -431,6 +437,8 @@ void update_app(App* app) {
     vec3 positions[MAX_COLLISION_OBJECTS];
     float radii[MAX_COLLISION_OBJECTS];
     int count = 0;
+
+    float fly_offset = app->fly_slider * MAX_FLY_HEIGHT;
 
     for (int c = 0; c < MAX_ACTIVE_CHUNKS; c++) {
 
@@ -462,9 +470,12 @@ void update_app(App* app) {
         count++;
     }
 
+    int current_obstacle_count = (app->fly_slider > 0.75f) ? 0 : count;
+
     update_camera(&(app->camera), elapsed_time,
-                  positions, radii, count,
-                  LAKE_CENTER_X, LAKE_CENTER_Y, LAKE_RADIUS - 4);
+                  positions, radii, current_obstacle_count,
+                  LAKE_CENTER_X, LAKE_CENTER_Y, LAKE_RADIUS - 4,
+                  fly_offset);
 
     update_scene(&(app->scene), &(app->camera), elapsed_time);
 }
@@ -477,7 +488,7 @@ void render_app(App* app) {
     glPushMatrix();
         set_view(&(app->camera));
         update_sky(app->scene.uptime, app->camera.position.x, app->camera.position.y, app->camera.position.z);
-        render_scene(&(app->scene), &(app->camera));
+        render_scene(&(app->scene), &(app->camera), app->fly_slider * MAX_FLY_HEIGHT);
     glPopMatrix();
 
     if (!app->menu_open) {
@@ -591,7 +602,7 @@ void render_menu(App* app) {
 
     // Panel dimensions 
 
-    float px = 10, py = 10, pw = 800, ph = 550;
+    float px = 10, py = 10, pw = 800, ph = 620;
     float inner_l = 20, inner_r = pw - 10;
     float slider_x = 320, slider_w = 460;
 
@@ -717,19 +728,41 @@ void render_menu(App* app) {
         glVertex2f(slider_x + fog_pos - 5, 265);
     glEnd();
 
+    // Fly height slider
+
+    draw_text("Fly height:", 30, 300, 0.8f, 0.85f, 0.9f);
+
+    glColor4f(0.3f, 0.3f, 0.35f, 1.0f);
+    glBegin(GL_QUADS);
+        glVertex2f(slider_x,             300);
+        glVertex2f(slider_x + slider_w,  300);
+        glVertex2f(slider_x + slider_w,  320);
+        glVertex2f(slider_x,             320);
+    glEnd();
+
+    float fly_pos = app->fly_slider * slider_w;
+
+    glColor4f(0.7f, 0.4f, 0.8f, 1.0f); 
+    glBegin(GL_QUADS);
+        glVertex2f(slider_x + fly_pos - 5, 295);
+        glVertex2f(slider_x + fly_pos + 5, 295);
+        glVertex2f(slider_x + fly_pos + 5, 325);
+        glVertex2f(slider_x + fly_pos - 5, 325);
+    glEnd();
+
     // Controls section header
 
     glColor4f(0.2f, 0.3f, 0.4f, 1.0f);
     glBegin(GL_QUADS);
-        glVertex2f(inner_l, 320);
-        glVertex2f(inner_r, 320);
-        glVertex2f(inner_r, 350);
-        glVertex2f(inner_l, 350);
+        glVertex2f(inner_l, 380);
+        glVertex2f(inner_r, 380);
+        glVertex2f(inner_r, 410);
+        glVertex2f(inner_l, 410);
     glEnd();
 
     draw_text("Controls", 30, 325, 0.85f, 0.95f, 1.0f);
 
-    float control_y = 370;
+    float control_y = 430;
     const char* control_labels[] = {
         "W / S        - Move forward / backward",
         "A / D        - Move left / right",

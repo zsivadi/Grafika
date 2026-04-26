@@ -26,6 +26,7 @@ typedef struct App {
     float time_slider;
     float fire_brightness;
     float fog_density;
+    float fly_slider;
     int dragging_slider;
 } App;
 

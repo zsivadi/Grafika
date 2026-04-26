@@ -110,7 +110,7 @@ void draw_smoke(double uptime, float cam_x, float cam_y, float fire_x, float fir
     glEnable(GL_TEXTURE_2D);
 }
 
-void render_clouds(double uptime, float cam_x, float cam_y, GLuint cloud_texture) {
+void render_clouds(double uptime, float cam_x, float cam_y, GLuint cloud_texture, float height_offset) {
 
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
@@ -120,21 +120,21 @@ void render_clouds(double uptime, float cam_x, float cam_y, GLuint cloud_texture
     glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
     glDepthMask(GL_FALSE); 
 
-    float base_height = 60.0f; 
-    float cell_size = 30.0f;  
-    int grid_radius = 6;       
-    float scroll_speed = 1.5f; 
+    //float base_height = 200.0f; 
+    //float cell_size = 30.0f;  
+    //int grid_radius = 6;       
+    //float scroll_speed = 1.5f; 
 
-    float virtual_x = cam_x - (float)uptime * scroll_speed;
+    float virtual_x = cam_x - (float)uptime * CLOUD_SCROLL_SPEED;
     float virtual_y = cam_y; 
 
-    int start_cx = (int)floorf(virtual_x / cell_size) - grid_radius;
-    int start_cy = (int)floorf(virtual_y / cell_size) - grid_radius;
+    int start_cx = (int)floorf(virtual_x / CLOUD_CELL_SIZE) - CLOUD_GRID_RADIUS;
+    int start_cy = (int)floorf(virtual_y / CLOUD_CELL_SIZE) - CLOUD_GRID_RADIUS;
 
     glBegin(GL_QUADS);
 
-    for (int x = 0; x < grid_radius * 2; x++) {
-        for (int y = 0; y < grid_radius * 2; y++) {
+    for (int x = 0; x < CLOUD_GRID_RADIUS * 2; x++) {
+        for (int y = 0; y < CLOUD_GRID_RADIUS * 2; y++) {
             
             int cx = start_cx + x;
             int cy = start_cy + y;
@@ -147,23 +147,23 @@ void render_clouds(double uptime, float cam_x, float cam_y, GLuint cloud_texture
 
             for (int i = 0; i < num_clouds; i++) {
                 
-                float offset_x = RND() * cell_size;
-                float offset_y = RND() * cell_size;
+                float offset_x = RND() * CLOUD_CELL_SIZE;
+                float offset_y = RND() * CLOUD_CELL_SIZE;
                 
                 float scale_x = 15.0f + RND() * 25.0f; 
                 float scale_y = 15.0f + RND() * 25.0f; 
                 
-                float height = base_height + RND() * 8.0f;
+                float height = CLOUD_BASE_HEIGHT + height_offset + RND() * 8.0f;
 
                 float base_alpha = 0.2f + RND() * 0.6f;
 
-                float wx = cx * cell_size + offset_x + (float)uptime * scroll_speed;
-                float wy = cy * cell_size + offset_y;
+                float wx = cx * CLOUD_CELL_SIZE + offset_x + (float)uptime * CLOUD_SCROLL_SPEED;
+                float wy = cy * CLOUD_CELL_SIZE + offset_y;
 
                 float dx = wx - cam_x;
                 float dy = wy - cam_y;
                 float dist = sqrtf(dx*dx + dy*dy);
-                float max_dist = grid_radius * cell_size;
+                float max_dist = CLOUD_GRID_RADIUS * CLOUD_CELL_SIZE;
 
                 if (dist > max_dist) continue; 
 

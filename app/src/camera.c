@@ -22,7 +22,7 @@ void init_camera(Camera* camera) {
     camera->is_preview_visible = false;
 }
 
-void update_camera(Camera* camera, double time, const vec3* obstacles, const float* radii, int obstacle_count, float lake_x, float lake_y, float lake_radius) {
+void update_camera(Camera* camera, double time, const vec3* obstacles, const float* radii, int obstacle_count, float lake_x, float lake_y, float lake_radius, float fly_offset) {
     
     double angle;
     double side_angle;
@@ -89,7 +89,7 @@ void update_camera(Camera* camera, double time, const vec3* obstacles, const flo
     
     // Smoothly adjust camera height to follow terrain
 
-    float target_z = terrain_height + eye_height;
+    float target_z = terrain_height + eye_height + fly_offset;
 
     float height_lerp_factor = 10.0f * time; 
     if (height_lerp_factor > 1.0f) height_lerp_factor = 1.0f;
